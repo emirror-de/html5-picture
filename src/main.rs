@@ -54,7 +54,15 @@ fn main() {
                     &html5_picture::get_output_dir_name(&config.input_dir).unwrap().to_str().unwrap(),
                     &entry_path.to_str().unwrap()
                     );
-                match std::fs::create_dir_all(out) { _ => (), };
+                if !entry_path.exists() {
+                    match std::fs::create_dir_all(out) {
+                        Ok(()) => (),
+                        Err(msg) => error!(
+                            "Could not create folder {}! Error: {}",
+                            entry_path.to_str().unwrap(),
+                            msg),
+                    };
+                }
         }
         // check if entry is a png file
         if html5_picture::is_png(&entry) {
