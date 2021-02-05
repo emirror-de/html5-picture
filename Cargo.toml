@@ -10,7 +10,7 @@ documentation = "https://github.com/emirror-de/html5-picture"
 repository = "https://github.com/emirror-de/html5-picture"
 readme = "README.md"
 keywords = ["html5", "picture", "convert", "wepb"]
-categories = ["web development", "image conversion", "tag generation"]
+categories = ["command-line-utilities", "compression", "multimedia::images", "web-programming"]
 
 [[bin]]
 name = "html5-picture"
