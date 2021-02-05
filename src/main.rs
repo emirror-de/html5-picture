@@ -1,4 +1,4 @@
-extern crate pretty_env_logger;
+#[warn(missing_docs)]
 
 use {
     clap::Clap,
