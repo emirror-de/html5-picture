@@ -4,7 +4,8 @@ version = "0.0.1-alpha"
 authors = ["Lewin Probst <info@emirror.de>"]
 edition = "2018"
 
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+[[bin]]
+name = "html5-picture"
 
 [dependencies]
 clap = "3.0.0-beta.2"
