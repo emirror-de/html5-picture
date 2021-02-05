@@ -3,7 +3,9 @@ use {
     std::path::PathBuf
 };
 
-pub fn from_png(input: &PathBuf, output_dir: &PathBuf) {
+/// Converts the given input file to webp using ```cwebp``` and saves it to disk
+/// into the output_dir folder.
+pub fn convert_from_png(input: &PathBuf, output_dir: &PathBuf) {
     if !&input.is_file() {
         error!("{} is not a file!", &input.to_str().unwrap());
         return;

@@ -1,3 +1,18 @@
+//! # Purpose an usage
+//!
+//! ***THIS CRATE IS IN ALPHA STAGE AND IS NOT MEANT TO BE USED YET!***
+//! 
+//! Supports the binary within this package.
+//! Contains functions to easily generate different sizes of a picture that
+//! is used on webpages. Also offers the possibility to convert them into webp
+//! format and is able to create a ```<picture>``` tag for the given images.
+//!
+//! Currently this crate is only capable of converting ```png``` files to webp using
+//! ```cwebp```.
+//! So make sure that webp is installed on your computer.
+
+
+/// Support for webp format. Used mainly for conversion.
 pub mod webp;
 
 use {
@@ -5,6 +20,9 @@ use {
     std::path::PathBuf,
 };
 
+
+
+/// Generates the output directory name.
 pub fn get_output_dir_name(input_dir: &str) -> Result<PathBuf, String> {
     let mut path = std::path::PathBuf::from(input_dir);
     if let None = &path.file_name() {
@@ -19,6 +37,7 @@ pub fn get_output_dir_name(input_dir: &str) -> Result<PathBuf, String> {
     Ok(path)
 }
 
+/// Creates the output directory on the filesystem.
 pub fn create_output_dir(input_dir: &str) -> Result<(), String> {
     let path = get_output_dir_name(input_dir)?;
     if path.exists() {
@@ -30,6 +49,7 @@ pub fn create_output_dir(input_dir: &str) -> Result<(), String> {
     }
 }
 
+/// Determines if the given input filename contains a .png extension.
 pub fn is_png(input: &DirEntry) -> bool {
     input.file_name()
         .to_str()

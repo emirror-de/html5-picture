@@ -7,9 +7,10 @@ use {
     std::path::PathBuf,
 };
 
-/// html5-picture
-/// Scales the input images to the given breakpoints and converts them to webp
-/// format.
+/// Scales the input images (currently png only) to the given breakpoints and
+/// converts them to webp format.
+/// Depends on cwebp, so make sure webp is installed on your pc!
+/// Currently passes -q 100 to cwebp.
 #[derive(Clap, Debug)]
 #[clap(version = "0.1.0", author = "Lewin Probst <info@emirror.de>")]
 struct Args {
@@ -67,7 +68,7 @@ fn main() {
         // check if entry is a png file
         if html5_picture::is_png(&entry) {
             let input = &entry.clone().into_path();
-            html5_picture::webp::from_png(
+            html5_picture::webp::convert_from_png(
                 &PathBuf::from(input),
                 &html5_picture::get_output_dir_name(&config.input_dir).unwrap()
                 );
