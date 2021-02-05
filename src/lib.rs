@@ -21,6 +21,9 @@ pub fn get_output_dir_name(input_dir: &str) -> Result<PathBuf, String> {
 
 pub fn create_output_dir(input_dir: &str) -> Result<(), String> {
     let path = get_output_dir_name(input_dir)?;
+    if path.exists() {
+        return Ok(());
+    }
     match std::fs::create_dir(path) {
         Ok(_) => Ok(()),
         Err(msg) => Err(msg.to_string()),
