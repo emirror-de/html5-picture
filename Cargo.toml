@@ -3,6 +3,14 @@ name = "html5-picture"
 version = "0.0.1-alpha"
 authors = ["Lewin Probst <info@emirror.de>"]
 edition = "2018"
+license = "MIT"
+description = "Batch optimizes your images to cwepb. Generates html5 picture tags."
+homepage = "https://github.com/emirror-de/html5-picture"
+documentation = "https://github.com/emirror-de/html5-picture"
+repository = "https://github.com/emirror-de/html5-picture"
+readme = "README.md"
+keywords = ["html5", "picture", "convert", "wepb"]
+categories = ["web development", "image conversion", "tag generation"]
 
 [[bin]]
 name = "html5-picture"
