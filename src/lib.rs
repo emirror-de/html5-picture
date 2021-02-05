@@ -1,6 +1,4 @@
-//! # Purpose an usage
-//!
-//! ***THIS CRATE IS IN ALPHA STAGE AND IS NOT MEANT TO BE USED YET!***
+//! # Purpose and usage
 //! 
 //! Supports the binary within this package.
 //! Contains functions to easily generate different sizes of a picture that
