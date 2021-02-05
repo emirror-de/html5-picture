@@ -10,6 +10,11 @@
 //! Currently this crate is only capable of converting ```png``` files to webp using
 //! ```cwebp```.
 //! So make sure that webp is installed on your computer.
+//!
+//! ## Installation
+//!
+//! The binary can be installed via ```cargo install html5-picture```. As stated
+//! before, make sure webp is installed before using.
 
 
 /// Support for webp format. Used mainly for conversion.
