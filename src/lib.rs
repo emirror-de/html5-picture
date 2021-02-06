@@ -28,6 +28,9 @@ use {
 /// Generates the output directory name.
 pub fn get_output_dir_name(input_dir: &str) -> Result<PathBuf, String> {
     let mut path = std::path::PathBuf::from(input_dir);
+    if !&path.is_dir() {
+        return Err(format!("{} is not a valid directory!", &input_dir));
+    }
     if let None = &path.file_name() {
         return Err(String::from("The last segment of the path is not valid!"));
     };
