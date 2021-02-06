@@ -66,7 +66,9 @@ fn main() {
                 }
         }
         // check if entry is a png file
-        if html5_picture::is_png(&entry) {
+        let file_name = entry.file_name().to_str().unwrap();
+        let input = &entry.clone().into_path();
+        if html5_picture::is_png(&file_name) {
             let input = &entry.clone().into_path();
             html5_picture::webp::convert_from_png(
                 &PathBuf::from(input),

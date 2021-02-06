@@ -19,11 +19,8 @@
 pub mod webp;
 
 use {
-    walkdir::DirEntry,
     std::path::PathBuf,
 };
-
-
 
 /// Generates the output directory name.
 pub fn get_output_dir_name(input_dir: &str) -> Result<PathBuf, String> {
@@ -56,9 +53,6 @@ pub fn create_output_dir(input_dir: &str) -> Result<(), String> {
 }
 
 /// Determines if the given input filename contains a .png extension.
-pub fn is_png(input: &DirEntry) -> bool {
-    input.file_name()
-        .to_str()
-        .map(|s| s.ends_with(".png"))
-        .unwrap_or(false)
+pub fn is_png(input: &str) -> bool {
+    input.ends_with(".png")
 }
