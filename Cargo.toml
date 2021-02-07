@@ -1,6 +1,6 @@
 [package]
 name = "html5-picture"
-version = "0.0.2-alpha"
+version = "0.0.3-alpha"
 authors = ["Lewin Probst <info@emirror.de>"]
 edition = "2018"
 license = "MIT"
@@ -20,3 +20,4 @@ clap = "3.0.0-beta.2"
 log = "0.4.14"
 walkdir = "2"
 pretty_env_logger = "0.4.0"
+pathdiff = "0.2.0"
