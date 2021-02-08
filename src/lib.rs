@@ -106,5 +106,4 @@ pub fn is_png(input: &PathBuf) -> bool {
         },
         None => false,
     }
-    //input.ends_with(".png")
 }
