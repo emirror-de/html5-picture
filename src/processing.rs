@@ -1,4 +1,4 @@
-use {crate::webp::WebpConverterAdapter, math, std::path::PathBuf};
+use {crate::webp::WebpConverterAdapter, log::error, math, std::path::PathBuf};
 
 /// Contains the determined image details required for conversion.
 #[derive(Debug)]
@@ -127,7 +127,7 @@ impl ImageProcessor {
         resized_image_details: Vec<ResizedImageDetails>,
     ) {
         for details in resized_image_details {
-            webp_adapter.from_png(
+            match webp_adapter.from_png(
                 &self.input,
                 &details.output_file_name,
                 Some(vec![
@@ -135,7 +135,10 @@ impl ImageProcessor {
                     details.width.to_string(),
                     details.height.to_string(),
                 ]),
-            );
+            ) {
+                Ok(_) => (),
+                Err(msg) => error!("{}", msg.to_string()),
+            };
         }
     }
 }

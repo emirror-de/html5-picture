@@ -48,6 +48,7 @@ fn check_arguments(config: &mut Args) {
 }
 
 fn main() {
+    std::env::set_var("RUST_LOG", "info");
     pretty_env_logger::init();
 
     // parse and check arguments for validity
@@ -88,10 +89,6 @@ fn main() {
         let entry = entry.into_path();
 
         if !html5_picture::is_png(&entry) {
-            warn!(
-                "Skipping {} because it is not a .png file!",
-                &entry.to_str().unwrap()
-            );
             continue;
         }
 
@@ -125,8 +122,8 @@ fn main() {
             };
         }
 
+        // resize and convert the png according to the given image count
         if let Some(v) = &config.scaled_images_count {
-            // resize and convert the png according to the given image count
             let p = ImageProcessor::new(
                 entry.clone(),
                 resulting_output_path.clone(),
@@ -142,7 +139,10 @@ fn main() {
         };
 
         // convert full scale in any case
-        webp_converter.from_png(&entry, &resulting_output_path, None);
+        match webp_converter.from_png(&entry, &resulting_output_path, None) {
+            Err(msg) => error!("{}", msg),
+            Ok(_) => (),
+        }
         return;
     }
 }

@@ -1,6 +1,6 @@
 use {
-    log::{error, info},
-    std::path::PathBuf,
+    log::info,
+    std::{path::PathBuf, process::Stdio},
 };
 
 pub struct WebpConverterAdapter {
@@ -29,17 +29,23 @@ impl WebpConverterAdapter {
 
     /// Converts the given input file to webp using ```cwebp``` and saves it to
     /// the given output file.
+    ///
+    /// ## Errors and panics
+    /// Returns an error if one or more parameters are invalid.
+    /// Panics if the call to ```cwebp``` fails.
+    ///
+    /// ## Returns
+    /// Returns the stdout output from cwebp.
     pub fn from_png(
         &self,
         input_file_name: &PathBuf,
         output_file_name: &PathBuf,
         additional_cwebp_arguments: Option<Vec<String>>,
-    ) {
+    ) -> Result<(), String> {
         if let Err(msg) =
             Self::parameter_check(&input_file_name, &output_file_name)
         {
-            error!("{}", msg);
-            return;
+            return Err(msg.to_string());
         };
         let o = &mut output_file_name.clone();
         o.set_extension("webp");
@@ -54,20 +60,15 @@ impl WebpConverterAdapter {
         if let Some(v) = additional_cwebp_arguments {
             args.append(&mut v.clone());
         };
-        let process =
-            match std::process::Command::new("cwebp").args(&args).spawn() {
-                Ok(process) => process,
-                Err(err) => panic!("Running process error: {}", err),
-            };
-
-        let output = match process.wait_with_output() {
-            Ok(output) => output,
-            Err(err) => panic!("Retrieving output error: {}", err),
+        info!("Processing file: {}", o.to_str().unwrap().to_string());
+        let _process = match std::process::Command::new("cwebp")
+            .args(&args)
+            .stdout(Stdio::null())
+            .output()
+        {
+            Ok(process) => process,
+            Err(err) => panic!("Running process error: {}", err),
         };
-
-        match std::string::String::from_utf8(output.stdout) {
-            Ok(stdout) => info!("{}", stdout),
-            Err(err) => panic!("Translating output error: {}", err),
-        };
+        Ok(())
     }
 }
