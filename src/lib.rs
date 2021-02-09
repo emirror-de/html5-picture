@@ -17,6 +17,11 @@
 /// Support for webp format. Used mainly for conversion.
 pub mod webp;
 
+/// Contains functionality for scaling and saving the image files.
+mod processing;
+
+pub use processing::ImageProcessor;
+
 use std::path::{Path, PathBuf};
 
 /// Generates the output directory name by attaching a fixed string to it.

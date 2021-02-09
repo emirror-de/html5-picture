@@ -1,8 +1,8 @@
 #[warn(missing_docs)]
 use {
     clap::Clap,
-    html5_picture::webp,
-    log::error,
+    html5_picture::{webp, ImageProcessor},
+    log::{error, warn},
     std::path::PathBuf,
     walkdir::WalkDir,
 };
@@ -18,11 +18,9 @@ const DEFAULT_QUALITY_WEBP: u8 = 70;
 struct Args {
     /// The directory containing all images that should be processed.
     pub input_dir: PathBuf,
-    /*
     /// Count of scaled images to be calculated.
     #[clap(short)]
     pub scaled_images_count: Option<u8>,
-    */
     /// Defines the quality of cwebp conversion.
     #[clap(short)]
     pub quality_webp: Option<u8>,
@@ -72,8 +70,8 @@ fn main() {
         return;
     }
 
-    // Instantiate converter
-    let webp_converter = webp::WebpConverter {
+    // Instantiate converter adapter
+    let webp_converter = webp::WebpConverterAdapter {
         quality: config.quality_webp.unwrap(),
     };
 
@@ -88,6 +86,15 @@ fn main() {
         };
 
         let entry = entry.into_path();
+
+        if !html5_picture::is_png(&entry) {
+            warn!(
+                "Skipping {} because it is not a .png file!",
+                &entry.to_str().unwrap()
+            );
+            continue;
+        }
+
         // get resulting output path name
         let f = match html5_picture::remove_base_dir(&config.input_dir, &entry)
         {
@@ -118,10 +125,24 @@ fn main() {
             };
         }
 
-        // check if entry is a png file
-        if html5_picture::is_png(&resulting_output_path) {
-            webp_converter
-                .from_png(&PathBuf::from(entry), &resulting_output_path);
-        }
+        if let Some(v) = &config.scaled_images_count {
+            // resize and convert the png according to the given image count
+            let p = ImageProcessor::new(
+                entry.clone(),
+                resulting_output_path.clone(),
+                *v,
+            );
+            let resized_image_details = p.get_resized_image_details();
+            match resized_image_details {
+                Ok(v) => {
+                    p.batch_convert(&webp_converter, v);
+                }
+                Err(msg) => error!("{}", msg),
+            };
+        };
+
+        // convert full scale in any case
+        webp_converter.from_png(&entry, &resulting_output_path, None);
+        return;
     }
 }
