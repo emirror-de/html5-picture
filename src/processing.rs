@@ -121,24 +121,35 @@ impl ImageProcessor {
 
     /// Converts the source image (stored in ```self.input``` on instantiation)
     /// to the given details. Additional flags are passed using the webp_adapter.
-    pub fn batch_convert(
+    pub async fn batch_convert(
         &self,
         webp_adapter: &WebpConverterAdapter,
         resized_image_details: Vec<ResizedImageDetails>,
     ) {
         for details in resized_image_details {
-            match webp_adapter.from_png(
+            //match webp_adapter.from_png(
+            //    &self.input,
+            //    &details.output_file_name,
+            //    Some(vec![
+            //        "-resize".to_string(),
+            //        details.width.to_string(),
+            //        details.height.to_string(),
+            //    ]),
+            //) {
+            //    Ok(_) => (),
+            //    Err(msg) => error!("{}", msg.to_string()),
+            //};
+            //match webp_adapter.convert_from_png(
+            //    &self.input,
+            //    &details.output_file_name
+            //) {
+            //    Ok(_) => (),
+            //    Err(msg) => error!("{}", msg.to_string()),
+            //};
+            webp_adapter.convert_from_png(
                 &self.input,
-                &details.output_file_name,
-                Some(vec![
-                    "-resize".to_string(),
-                    details.width.to_string(),
-                    details.height.to_string(),
-                ]),
-            ) {
-                Ok(_) => (),
-                Err(msg) => error!("{}", msg.to_string()),
-            };
+                &details.output_file_name
+            ).await;
         }
     }
 }

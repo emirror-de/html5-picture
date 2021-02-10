@@ -1,10 +1,9 @@
 #[warn(missing_docs)]
 use {
     clap::Clap,
-    html5_picture::{webp, ImageProcessor},
-    log::{error, warn},
-    std::path::PathBuf,
-    walkdir::WalkDir,
+    html5_picture::{webp},
+    log::{error, warn, debug},
+    std::{path::PathBuf, sync::Arc},
 };
 
 const DEFAULT_QUALITY_WEBP: u8 = 70;
@@ -14,7 +13,7 @@ const DEFAULT_QUALITY_WEBP: u8 = 70;
 /// Depends on cwebp, so make sure webp is installed on your pc!
 /// Currently passes -q 100 to cwebp.
 #[derive(Clap, Debug)]
-#[clap(version = "0.0.3-alpha", author = "Lewin Probst <info@emirror.de>")]
+#[clap(version = "0.0.4-alpha", author = "Lewin Probst <info@emirror.de>")]
 struct Args {
     /// The directory containing all images that should be processed.
     pub input_dir: PathBuf,
@@ -31,50 +30,58 @@ struct Args {
     */
 }
 
-fn check_arguments(config: &mut Args) {
-    // set default quality
-    if let None = &config.quality_webp {
-        config.quality_webp = Some(DEFAULT_QUALITY_WEBP);
-    } else {
-        // only a quality between 1 and 100 is available for webp
-        config.quality_webp = if config.quality_webp.unwrap() > 100 {
-            Some(100)
-        } else if config.quality_webp.unwrap() < 1 {
-            Some(1)
-        } else {
-            Some(DEFAULT_QUALITY_WEBP)
-        };
-    }
-}
-
-fn main() {
-    std::env::set_var("RUST_LOG", "info");
+#[tokio::main]
+async fn main() {
+    std::env::set_var("RUST_LOG", "debug");
     pretty_env_logger::init();
 
+    debug!("Parsing arguments...");
     // parse and check arguments for validity
-    let mut config: Args = Args::parse();
-    check_arguments(&mut config);
-    let config = config;
+    let config: Args = Args::parse();
+    debug!("...done! Arguments:\n{:#?}", &config);
 
+    debug!("Calculate output working directory...");
     // get overall output directory
-    let output_base_dir =
-        match html5_picture::get_output_dir_name(&config.input_dir) {
+    let output_working_dir =
+        match html5_picture::path::get_output_working_dir(&config.input_dir) {
             Ok(o) => o,
             Err(msg) => {
                 error!("{}", msg);
                 return;
             }
         };
-    // create output directory for converted files
-    if let Err(msg) = html5_picture::create_output_dir(&config.input_dir) {
-        error!("{}", msg);
-        return;
-    }
+    debug!("...done! Output working directory:\n{:#?}", &output_working_dir);
 
-    // Instantiate converter adapter
-    let webp_converter = webp::WebpConverterAdapter {
-        quality: config.quality_webp.unwrap(),
+    debug!("Initializing processor...");
+    let webp_params = webp::WebpParameter::new(
+        config.quality_webp,
+    );
+    //let test_image = PathBuf::from("circles/original/education.png");
+    //let test_output_dir = PathBuf::from("circles/original");
+    //let params = webp::ProcessorParameter {
+    //    webp_parameter: webp_params,
+    //    input: config.input_dir.join(&test_image),
+    //    output_dir: output_working_dir.join(test_output_dir),
+    //    scaled_images_count: config.scaled_images_count,
+    //};
+    //let mut webp_processor = webp::SingleProcessor::new(params).unwrap();
+    let params = webp::ProcessorParameter {
+        webp_parameter: webp_params,
+        input: config.input_dir,
+        output_dir: output_working_dir,
+        scaled_images_count: config.scaled_images_count,
     };
+    let mut webp_processor = webp::BatchProcessor::new(params);
+    webp_processor.run().await;
+    debug!("...done!");
+    return;
+    //let webp_batch_processor = webp::BatchProcessor::new(params);
+
+    /*
+    // Instantiate converter adapter
+    let webp_converter = Arc::new(webp::WebpConverterAdapter {
+        quality: config.quality_webp.unwrap(),
+    });
 
     // process all images
     for entry in WalkDir::new(&config.input_dir) {
@@ -93,7 +100,7 @@ fn main() {
         }
 
         // get resulting output path name
-        let f = match html5_picture::remove_base_dir(&config.input_dir, &entry)
+        let f = match html5_picture::path::remove_base_dir(&config.input_dir, &entry)
         {
             Ok(s) => s,
             Err(msg) => {
@@ -101,7 +108,7 @@ fn main() {
                 return;
             }
         };
-        let resulting_output_path = output_base_dir.join(f);
+        let resulting_output_path = output_working_dir.join(f);
 
         // create the output directory if the entry is one
         if entry.is_dir() && !resulting_output_path.exists() {
@@ -124,15 +131,19 @@ fn main() {
 
         // resize and convert the png according to the given image count
         if let Some(v) = &config.scaled_images_count {
-            let p = ImageProcessor::new(
+            let p = Arc::new(ImageProcessor::new(
                 entry.clone(),
                 resulting_output_path.clone(),
                 *v,
-            );
+            ));
             let resized_image_details = p.get_resized_image_details();
             match resized_image_details {
                 Ok(v) => {
-                    p.batch_convert(&webp_converter, v);
+                    let c = webp_converter.clone();
+                    let p_clone = p.clone();
+                    tokio::spawn(async move {
+                        p_clone.batch_convert(&c, v).await;
+                    });
                 }
                 Err(msg) => error!("{}", msg),
             };
@@ -145,4 +156,5 @@ fn main() {
         }
         return;
     }
+    */
 }
