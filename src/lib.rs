@@ -13,6 +13,7 @@
 //!
 //! The binary can be installed via ```cargo install html5-picture```. As stated
 //! before, make sure webp is installed before using.
+use {indicatif::ProgressBar, log::error, walkdir::WalkDir};
 
 /// Support for webp format. Used mainly for conversion.
 pub mod webp;
@@ -34,4 +35,31 @@ pub fn is_png(input: &PathBuf) -> bool {
         },
         None => false,
     }
+}
+
+pub fn collect_png_file_names(
+    input_dir: &PathBuf,
+    progressbar: Option<ProgressBar>,
+) -> Vec<PathBuf> {
+    let mut file_names = vec![];
+    for entry in WalkDir::new(&input_dir) {
+        // unwrap the entry
+        let entry = if let Err(msg) = &entry {
+            error!("{}", msg.to_string());
+            continue;
+        } else {
+            entry.unwrap()
+        };
+        let entry = entry.into_path();
+
+        if let Some(ref pb) = progressbar {
+            pb.tick();
+        }
+
+        if !is_png(&entry) {
+            continue;
+        }
+        file_names.push(entry);
+    }
+    file_names
 }

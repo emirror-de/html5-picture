@@ -1,26 +1,42 @@
 use std::path::{Path, PathBuf};
 
+/// Generates an output file name that is stored in the output working directory.
+/// ## Example
+///
+/// ```
+/// use {
+///     html5_picture::path::create_output_file_name,
+///     std::path::PathBuf,
+/// };
+///
+/// let base_dir = PathBuf::from("../assets");
+/// let input_file = PathBuf::from("../assets/some/picture.png");
+/// let output_file = create_output_file_name(&base_dir, &input_file).unwrap();
+/// assert_eq!(output_file.to_str().unwrap(), "../assets-html5picture/some/picture.png");
+/// ```
+pub fn create_output_file_name(
+    base_dir: &PathBuf,
+    input_file: &PathBuf,
+) -> Result<PathBuf, String> {
+    let output_base_dir = get_output_working_dir(&base_dir)?;
+    let relative_file_name = remove_base_dir(&base_dir, &input_file)?;
+    Ok(output_base_dir.join(relative_file_name))
+}
+
 /// Generates the output directory name by attaching a fixed string to it.
 /// ## Example
 ///
 /// ```
 /// use {
-///     html5_picture::get_output_dir_name,
+///     html5_picture::path::get_output_working_dir,
 ///     std::path::PathBuf,
 /// };
 ///
 /// let input = PathBuf::from("../assets");
-/// let input = get_output_dir_name(&input).unwrap();
+/// let input = get_output_working_dir(&input).unwrap();
 /// assert_eq!(input.to_str().unwrap(), "../assets-html5picture");
 /// ```
 pub fn get_output_working_dir(input_dir: &PathBuf) -> Result<PathBuf, String> {
-    // validity checks
-    if !&input_dir.is_dir() {
-        match &input_dir.to_str() {
-            Some(v) => return Err(format!("{} is not a valid directory!", v)),
-            None => return Err(format!("Please provide a valid directory!")),
-        }
-    }
     if let None = &input_dir.file_name() {
         return Err(String::from(
             "The last segment of the input path is not valid!",
@@ -43,13 +59,14 @@ pub fn get_output_working_dir(input_dir: &PathBuf) -> Result<PathBuf, String> {
 ///
 /// ```
 /// use {
-///     html5_picture::path::get_output_working_dir,
+///     html5_picture::path::remove_base_dir,
 ///     std::path::PathBuf,
 /// };
 ///
-/// let input = PathBuf::from("../assets");
-/// let input = html5_picture::path::get_output_working_dir(&input).unwrap();
-/// assert_eq!(input.to_str().unwrap(), "../assets-html5picture");
+/// let base_dir = PathBuf::from("../assets");
+/// let input_file = PathBuf::from("../assets/some_other/directory/picture.png");
+/// let output = remove_base_dir(&base_dir, &input_file).unwrap();
+/// assert_eq!(output.to_str().unwrap(), "some_other/directory/picture.png");
 /// ```
 pub fn remove_base_dir(
     base_dir: &PathBuf,

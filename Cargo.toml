@@ -25,3 +25,5 @@ image = "^0.23.13"
 libmath = "^0.2.1"
 tokio = { version = "1", features = ["full"] }
 webp = { git = "https://github.com/emirror-de/webp.git", branch = "master" }
+futures = "*"
+indicatif = "0.15.0"
