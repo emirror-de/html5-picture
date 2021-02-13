@@ -1,160 +1,137 @@
-#[warn(missing_docs)]
 use {
     clap::Clap,
-    html5_picture::{webp},
-    log::{error, warn, debug},
+    indicatif::{MultiProgress, ProgressBar, ProgressStyle},
     std::{path::PathBuf, sync::Arc},
+    queue::Queue,
 };
 
-const DEFAULT_QUALITY_WEBP: u8 = 70;
-
-/// Scales the input images (currently png only) to the given breakpoints and
-/// converts them to webp format.
+/// Converts the images (currently png only) of the input folder to webp format.
+/// It also has the ability to create multiple versions of the input images
+/// having different sizes. See -s for further details.
+///
 /// Depends on cwebp, so make sure webp is installed on your pc!
-/// Currently passes -q 100 to cwebp.
 #[derive(Clap, Debug)]
 #[clap(version = "0.0.4-alpha", author = "Lewin Probst <info@emirror.de>")]
 struct Args {
     /// The directory containing all images that should be processed.
     pub input_dir: PathBuf,
-    /// Count of scaled images to be calculated.
+    /// The source image width is divided by this option (value + 1). Afterwards
+    /// the source image is scaled (keeping the aspect ratio) to these widths
+    /// before convertion.
+    ///
+    /// Useful if you want to have multiple sizes of the image on the webpage
+    /// for different breakpoints.
+    ///
+    /// Example:
+    /// Input image dimensions: 6000x962
+    /// Scaled images count: 3
+    /// Resulting converted images:
+    ///     [filename]               [dimensions]
+    ///     original_filename        6000x962
+    ///     original_filename-w4500  4500x751
+    ///     original_filename-w3000  3000x501
+    ///     original_filename-w1500  1500x250
     #[clap(short)]
     pub scaled_images_count: Option<u8>,
+    #[clap(short)]
+    pub install_images_into: Option<PathBuf>,
     /// Defines the quality of cwebp conversion.
     #[clap(short)]
     pub quality_webp: Option<u8>,
-    /*
-    /// Disable conversion to webp. (Not implemented yet)
-    #[clap(short)]
-    pub disable_webp: bool,
-    */
 }
 
-#[tokio::main]
-async fn main() {
-    std::env::set_var("RUST_LOG", "debug");
+fn create_spinner() -> ProgressBar {
+    let pb = ProgressBar::new_spinner();
+    pb.set_style(
+        ProgressStyle::default_bar()
+            .template("[{prefix}] {spinner} {wide_msg}"),
+    );
+    pb
+}
+
+struct State {
+    pub config: Args,
+    pub file_names_to_convert: Vec<PathBuf>,
+    pub max_progress_steps: usize,
+}
+
+impl State {
+    pub fn new(config: Args, max_progress_steps: usize) -> Self {
+        Self {
+            config,
+            file_names_to_convert: vec![],
+            max_progress_steps,
+        }
+    }
+}
+
+fn collect_file_names(state: &mut State) {
+    let pb = create_spinner();
+    pb.set_prefix(&format!("1/{}", state.max_progress_steps));
+    pb.set_message("Collecting files to convert...");
+    state.file_names_to_convert = html5_picture::collect_png_file_names(
+        &state.config.input_dir, //&config.input_dir,
+        Some(pb.clone()),
+    );
+    pb.finish_with_message(&format!(
+        "Collected {} files!",
+        &state.file_names_to_convert.len(), //&file_names_to_convert.len()
+    ));
+}
+
+fn create_all_output_directories(state: &mut State) {
+    let pb = create_spinner();
+    pb.set_prefix(&format!("2/{}", state.max_progress_steps));
+    pb.set_message("Create all output directories...");
+    html5_picture::fs::create_output_directories(
+        &state.config.input_dir, //&config.input_dir,
+        &state.file_names_to_convert, //&file_names_to_convert,
+        Some(pb.clone()),
+    );
+    pb.finish_with_message("Created all output directories!");
+}
+
+fn process_images(state: &mut State) {
+    let webp_params = html5_picture::webp::Parameter::new(state.config.quality_webp); //config.quality_webp);
+    let params = html5_picture::webp::processor::Parameter {
+        webp_parameter: webp_params,
+        input: state.config.input_dir.clone(), //input: config.input_dir,
+        output_dir: PathBuf::new(),
+        scaled_images_count: state.config.scaled_images_count, //scaled_images_count: config.scaled_images_count,
+    };
+    let batch_params = html5_picture::webp::processor::BatchParameter {
+        single_params: params,
+    };
+    let mp = Arc::new(MultiProgress::new());
+    let batch_processor = html5_picture::webp::processor::BatchProcessor::new(
+        batch_params,
+        Some(Arc::clone(&mp)),
+    );
+    let pb = create_spinner();
+    pb.set_prefix(&format!("3/{}", state.max_progress_steps));
+    pb.set_message("Converting files...");
+    batch_processor.run(&state.file_names_to_convert);
+    pb.finish_with_message("Finished :-)");
+}
+
+fn main() {
+    std::env::set_var("RUST_LOG", "error");
     pretty_env_logger::init();
 
-    debug!("Parsing arguments...");
     // parse and check arguments for validity
     let config: Args = Args::parse();
-    debug!("...done! Arguments:\n{:#?}", &config);
 
-    debug!("Calculate output working directory...");
-    // get overall output directory
-    let output_working_dir =
-        match html5_picture::path::get_output_working_dir(&config.input_dir) {
-            Ok(o) => o,
-            Err(msg) => {
-                error!("{}", msg);
-                return;
-            }
-        };
-    debug!("...done! Output working directory:\n{:#?}", &output_working_dir);
+    // add all default processes
+    let mut q: Queue<fn(&mut State)> = Queue::new();
+    q.queue(collect_file_names).unwrap();
+    q.queue(create_all_output_directories).unwrap();
 
-    debug!("Initializing processor...");
-    let webp_params = webp::WebpParameter::new(
-        config.quality_webp,
-    );
-    //let test_image = PathBuf::from("circles/original/education.png");
-    //let test_output_dir = PathBuf::from("circles/original");
-    //let params = webp::ProcessorParameter {
-    //    webp_parameter: webp_params,
-    //    input: config.input_dir.join(&test_image),
-    //    output_dir: output_working_dir.join(test_output_dir),
-    //    scaled_images_count: config.scaled_images_count,
-    //};
-    //let mut webp_processor = webp::SingleProcessor::new(params).unwrap();
-    let params = webp::ProcessorParameter {
-        webp_parameter: webp_params,
-        input: config.input_dir,
-        output_dir: output_working_dir,
-        scaled_images_count: config.scaled_images_count,
-    };
-    let mut webp_processor = webp::BatchProcessor::new(params);
-    webp_processor.run().await;
-    debug!("...done!");
-    return;
-    //let webp_batch_processor = webp::BatchProcessor::new(params);
+    // finally add processing step
+    q.queue(process_images).unwrap();
 
-    /*
-    // Instantiate converter adapter
-    let webp_converter = Arc::new(webp::WebpConverterAdapter {
-        quality: config.quality_webp.unwrap(),
-    });
+    let mut s = State::new(config, q.len());
 
-    // process all images
-    for entry in WalkDir::new(&config.input_dir) {
-        // unwrap the entry
-        let entry = if let Err(msg) = &entry {
-            error!("{}", msg.to_string());
-            continue;
-        } else {
-            entry.unwrap()
-        };
-
-        let entry = entry.into_path();
-
-        if !html5_picture::is_png(&entry) {
-            continue;
-        }
-
-        // get resulting output path name
-        let f = match html5_picture::path::remove_base_dir(&config.input_dir, &entry)
-        {
-            Ok(s) => s,
-            Err(msg) => {
-                error!("{}", msg);
-                return;
-            }
-        };
-        let resulting_output_path = output_working_dir.join(f);
-
-        // create the output directory if the entry is one
-        if entry.is_dir() && !resulting_output_path.exists() {
-            match std::fs::create_dir_all(&resulting_output_path) {
-                Ok(()) => (),
-                Err(msg) => {
-                    match resulting_output_path.to_str() {
-                        Some(v) => error!(
-                            "Could not create folder {}! Error: {}",
-                            v, msg
-                        ),
-                        None => {
-                            error!("Could not create folder! Error {}", msg)
-                        }
-                    };
-                    return;
-                }
-            };
-        }
-
-        // resize and convert the png according to the given image count
-        if let Some(v) = &config.scaled_images_count {
-            let p = Arc::new(ImageProcessor::new(
-                entry.clone(),
-                resulting_output_path.clone(),
-                *v,
-            ));
-            let resized_image_details = p.get_resized_image_details();
-            match resized_image_details {
-                Ok(v) => {
-                    let c = webp_converter.clone();
-                    let p_clone = p.clone();
-                    tokio::spawn(async move {
-                        p_clone.batch_convert(&c, v).await;
-                    });
-                }
-                Err(msg) => error!("{}", msg),
-            };
-        };
-
-        // convert full scale in any case
-        match webp_converter.from_png(&entry, &resulting_output_path, None) {
-            Err(msg) => error!("{}", msg),
-            Ok(_) => (),
-        }
-        return;
+    while let Some(step_function) = q.dequeue() {
+        step_function(&mut s);
     }
-    */
 }

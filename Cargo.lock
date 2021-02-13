@@ -373,6 +373,7 @@ dependencies = [
  "log",
  "pathdiff",
  "pretty_env_logger",
+ "queue",
  "tokio",
  "walkdir",
  "webp",
@@ -747,6 +748,12 @@ checksum = "1e0704ee1a7e00d7bb417d0770ea303c1bccbabf0ef1667dae92b5967f5f8a71"
 dependencies = [
  "unicode-xid",
 ]
+
+[[package]]
+name = "queue"
+version = "0.3.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "6ff7e7fd62294a081720771513c1c1c995468a5d4e771a2928e423b88682ce48"
 
 [[package]]
 name = "quick-error"
