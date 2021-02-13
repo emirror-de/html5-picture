@@ -1,5 +1,4 @@
 use {
-    clap::Clap,
     crate::{
         path,
         utils,
@@ -7,8 +6,9 @@ use {
         webp::processor::Parameter as ProcessorParameter,
         webp::WebpParameter,
     },
-    fs_extra::dir::{CopyOptions, move_dir_with_progress, TransitProcess},
-    indicatif::{MultiProgress},
+    clap::Clap,
+    fs_extra::dir::{move_dir_with_progress, CopyOptions, TransitProcess},
+    indicatif::MultiProgress,
     log::error,
     queue::Queue,
     std::{path::PathBuf, sync::Arc},
@@ -19,10 +19,15 @@ type Step = fn(&mut State);
 /// Converts the images (currently png only) of the input folder to webp format.
 /// It also has the ability to create multiple versions of the input images
 /// having different sizes. See -s for further details.
+/// Additionally it automatically generates HTML5 <picture> tag files for you
+/// to be able to integrate them in a webpage easily.
 ///
 /// Depends on cwebp, so make sure webp is installed on your pc!
 #[derive(Clap, Debug)]
-#[clap(version = "0.0.5-alpha", author = "Lewin Probst <info@emirror.de>, Michael Flau <michael@flau.net>")]
+#[clap(
+    version = "0.0.5-alpha",
+    author = "Lewin Probst <info@emirror.de>, Michael Flau <michael@flau.net>"
+)]
 pub struct Config {
     /// The directory containing all images that should be processed.
     pub input_dir: PathBuf,
@@ -46,6 +51,9 @@ pub struct Config {
     /// Installs the converted and sized pictures into the given folder.
     #[clap(short)]
     pub install_images_into: Option<PathBuf>,
+    /// If true, the generation of HTML5 picture tag files is skipped.
+    #[clap(short)]
+    pub skip_html5_picture_tags: bool,
     /// If true, existing files are overwritten if install_images_into is set.
     #[clap(short)]
     pub force_overwrite: bool,
@@ -54,7 +62,7 @@ pub struct Config {
     pub quality_webp: Option<u8>,
 }
 
-
+/// Contains the application state and config.
 pub struct State {
     pub config: Config,
     pub file_names_to_convert: Vec<PathBuf>,
@@ -63,6 +71,7 @@ pub struct State {
 }
 
 impl State {
+    /// Creates a new instance of the application state.
     pub fn new(config: Config, max_progress_steps: usize) -> Self {
         Self {
             config,
@@ -72,16 +81,20 @@ impl State {
         }
     }
 
+    /// Small wrapper around the original dequeue function that automatically
+    /// calculates the current application step.
     pub fn dequeue(&mut self, queue: &mut Queue<Step>) -> Option<Step> {
         self.current_step = self.max_progress_steps + 1 - queue.len();
         queue.dequeue()
     }
 
+    /// Returns the prefix that is used in the ProgressBars.
     pub fn get_prefix(&self) -> String {
         format!("{}/{}", self.current_step, self.max_progress_steps)
     }
 }
 
+/// Collects all png files in the given input folder.
 pub fn collect_file_names(state: &mut State) {
     let pb = utils::create_spinner();
     pb.set_prefix(&state.get_prefix());
@@ -96,18 +109,20 @@ pub fn collect_file_names(state: &mut State) {
     ));
 }
 
+/// Recreates the folder structure of the input directory in the output directory.
 pub fn create_all_output_directories(state: &mut State) {
     let pb = utils::create_spinner();
     pb.set_prefix(&state.get_prefix());
     pb.set_message("Create all output directories...");
     crate::fs::create_output_directories(
-        &state.config.input_dir, //&config.input_dir,
+        &state.config.input_dir,      //&config.input_dir,
         &state.file_names_to_convert, //&file_names_to_convert,
         Some(pb.clone()),
     );
     pb.finish_with_message("Created all output directories!");
 }
 
+/// Resizes and converts all input images.
 pub fn process_images(state: &mut State) {
     let webp_params = WebpParameter::new(state.config.quality_webp); //config.quality_webp);
     let params = ProcessorParameter {
@@ -131,6 +146,7 @@ pub fn process_images(state: &mut State) {
     pb.finish_with_message("Finished :-)");
 }
 
+/// Installs all images that have been converted to the given install folder.
 pub fn install_images_into(state: &mut State) {
     let pb = utils::create_progressbar(0);
     match &state.config.install_images_into {
@@ -138,19 +154,23 @@ pub fn install_images_into(state: &mut State) {
         Some(p) => {
             if !p.is_dir() {
                 if let Err(msg) = std::fs::create_dir_all(p) {
-                    pb.abandon_with_message(&format!("Could not create folder: {}", msg.to_string()));
+                    pb.abandon_with_message(&format!(
+                        "Could not create folder: {}",
+                        msg.to_string()
+                    ));
                 }
             }
         }
     }
     pb.set_prefix(&state.get_prefix());
-    let install_path = state.config.install_images_into.as_ref().unwrap().to_str();
+    let install_path =
+        state.config.install_images_into.as_ref().unwrap().to_str();
     let install_string = match install_path {
         Some(s) => s,
         None => {
             pb.abandon_with_message("Invalid install_images_into parameter!");
             return;
-        },
+        }
     };
     let force_overwrite = state.config.force_overwrite;
     let pb_clone = pb.clone();
@@ -170,9 +190,10 @@ pub fn install_images_into(state: &mut State) {
         path::get_output_working_dir(&state.config.input_dir).unwrap(),
         state.config.install_images_into.as_ref().unwrap(),
         &copy_options,
-        progress_handler) {
-            Ok(b) => error!("{}", b),
-            Err(msg) => error!("{}", msg.to_string()),
+        progress_handler,
+    ) {
+        Ok(b) => error!("{}", b),
+        Err(msg) => error!("{}", msg.to_string()),
     };
     pb.finish_with_message("Successfully installed images :-)");
 }

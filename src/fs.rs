@@ -1,3 +1,5 @@
+//! Contains supporting functions that alter the file system.
+
 use {indicatif::ProgressBar, log::error, std::path::PathBuf};
 
 /// Calls ```get_output_working_dir``` for name conversion and creates the output directory on the filesystem.
@@ -12,6 +14,7 @@ pub fn create_output_working_dir(input_dir: &PathBuf) -> Result<(), String> {
     }
 }
 
+/// Recreates the input directory structure in the output working directory.
 pub fn create_output_directories(
     input_dir: &PathBuf,
     input_file_names: &Vec<PathBuf>,

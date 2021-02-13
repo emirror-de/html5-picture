@@ -1,7 +1,6 @@
-use {
-    indicatif::{ProgressBar, ProgressStyle},
-};
+use indicatif::{ProgressBar, ProgressStyle};
 
+/// Creates a spinner that can be used to indicate progress.
 pub fn create_spinner() -> ProgressBar {
     let pb = ProgressBar::new_spinner();
     pb.set_style(
@@ -11,6 +10,7 @@ pub fn create_spinner() -> ProgressBar {
     pb
 }
 
+/// Creates a progress bar that can be used to indicate progress.
 pub fn create_progressbar(len: u64) -> ProgressBar {
     let pb = ProgressBar::new(len);
     pb.set_style(

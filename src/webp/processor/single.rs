@@ -6,6 +6,10 @@ use {
     std::{fs::File, io::Write, path::PathBuf},
     webp::WebPMemory,
 };
+
+/// Resizes and converts the given input file to webp format. Every function
+/// of This instance is single threaded. Multi threading support is provided
+/// by the ```BatchProcessor``` struct.
 pub struct SingleProcessor {
     params: Parameter,
     image: Option<DynamicImage>,
@@ -13,6 +17,7 @@ pub struct SingleProcessor {
 }
 
 impl SingleProcessor {
+    /// Creates a new instance of the struct.
     pub fn new(
         params: Parameter,
         progressbar: Option<ProgressBar>,
@@ -53,6 +58,7 @@ impl SingleProcessor {
         encoder.encode(self.params.webp_parameter.quality as f32)
     }
 
+    /// Loads, resizes and converts the image to webp. Single threaded.
     pub fn run(&mut self) -> Result<(), String> {
         if let Some(ref pb) = &self.progressbar {
             pb.set_prefix(&self.params.input.to_str().unwrap());
@@ -103,6 +109,7 @@ impl SingleProcessor {
         Ok(())
     }
 
+    /// Subroutine of ```run```, processes the resizing before conversion.
     fn run_resize_images(&self, details: Vec<ResizedImageDetails>) {
         for detail in details.iter().rev() {
             if let Some(ref pb) = &self.progressbar {
@@ -136,6 +143,7 @@ impl SingleProcessor {
         }
     }
 
+    /// Generates the output file name for resized images.
     fn get_output_file_name(&self) -> Result<PathBuf, String> {
         let file_name = self.params.input.file_stem();
         if let None = &file_name {

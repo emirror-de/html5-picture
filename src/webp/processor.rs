@@ -2,10 +2,13 @@ use {crate::webp::WebpParameter, std::path::PathBuf};
 
 mod batch;
 mod single;
-pub use batch::BatchParameter;
-pub use batch::BatchProcessor;
-pub use single::SingleProcessor;
 
+pub use {
+    batch::{BatchParameter, BatchProcessor},
+    single::SingleProcessor,
+};
+
+/// The parameter required for ```SingleProcessor``` to run.
 #[derive(Clone, Debug)]
 pub struct Parameter {
     pub webp_parameter: WebpParameter,
@@ -23,6 +26,7 @@ pub struct ResizedImageDetails {
 }
 
 impl ResizedImageDetails {
+    /// Creates a new instance.
     pub fn new(output_file_name: PathBuf, width: u32, height: u32) -> Self {
         Self {
             output_file_name,

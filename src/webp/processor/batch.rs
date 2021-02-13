@@ -8,20 +8,27 @@ use {
     std::{path::PathBuf, sync::Arc},
 };
 
+/// Contains all the required and optional parameter for the ```BatchProcessor```.
+/// Currently it is only a wrapper around the single processor parameter.
 pub struct BatchParameter {
     pub single_params: Parameter,
 }
 
+/// Processes all input files using the ```SingleProcessor``` struct.
 pub struct BatchProcessor {
     params: BatchParameter,
     progressbars: Option<Arc<MultiProgress>>,
 }
 
 impl BatchProcessor {
+    /// Creates a new instance.
     pub fn new(params: BatchParameter, progressbars: Option<Arc<MultiProgress>>) -> Self {
         Self { params, progressbars }
     }
 
+    /// For each file name, a new ```SingleProcessor``` instance is created and
+    /// spawned in a separate tokio thread. This function creates a new tokio
+    /// runtime.
     pub fn run(&self, file_names: &Vec<PathBuf>) {
         let rt = tokio::runtime::Runtime::new().unwrap();
         rt.block_on(async {
