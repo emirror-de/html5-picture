@@ -195,5 +195,14 @@ pub fn install_images_into(state: &mut State) {
         Ok(b) => error!("{}", b),
         Err(msg) => error!("{}", msg.to_string()),
     };
-    pb.finish_with_message("Successfully installed images :-)");
+    pb.finish_with_message(&format!(
+        "Successfully installed images to {}!",
+        state
+            .config
+            .install_images_into
+            .as_ref()
+            .unwrap()
+            .to_str()
+            .unwrap()
+    ));
 }
