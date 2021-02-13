@@ -13,7 +13,13 @@
 //!
 //! The binary can be installed via ```cargo install html5-picture```. As stated
 //! before, make sure webp is installed before using.
-use {indicatif::ProgressBar, log::error, walkdir::WalkDir};
+use {indicatif::ProgressBar, log::error, std::path::PathBuf, walkdir::WalkDir};
+
+/// Contains default functions and traits.
+pub mod core;
+
+/// Generic helper functions.
+pub mod utils;
 
 /// Support for webp format. Used mainly for conversion.
 pub mod webp;
@@ -24,7 +30,6 @@ pub mod path;
 /// Functions operating on the filesystem that is required for ```html5_picture```
 pub mod fs;
 
-use std::path::PathBuf;
 
 /// Determines if the given input filename contains a .png extension.
 pub fn is_png(input: &PathBuf) -> bool {

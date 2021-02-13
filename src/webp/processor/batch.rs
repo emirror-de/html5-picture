@@ -1,18 +1,12 @@
 use {
-    super::Parameter,
-    indicatif::{MultiProgress, ProgressBar, ProgressStyle},
+    crate::{
+        utils::create_progressbar,
+        webp::processor::Parameter,
+    },
+    indicatif::{MultiProgress},
     log::error,
     std::{path::PathBuf, sync::Arc},
 };
-
-fn create_progressbar(len: u64) -> ProgressBar {
-    let pb = ProgressBar::new(len);
-    pb.set_style(
-        ProgressStyle::default_bar()
-            .template("[{prefix}] {msg} {wide_bar: .cyan/blue} {pos:0}/{len}"),
-    );
-    pb
-}
 
 pub struct BatchParameter {
     pub single_params: Parameter,
