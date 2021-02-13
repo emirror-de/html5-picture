@@ -3,9 +3,9 @@ use {
     crate::{
         path,
         utils,
-        webp::Parameter as WebpParameter,
-        webp::processor::Parameter as ProcessorParameter,
         webp::processor::BatchParameter,
+        webp::processor::Parameter as ProcessorParameter,
+        webp::WebpParameter,
     },
     fs_extra::dir::{CopyOptions, move_dir_with_progress, TransitProcess},
     indicatif::{MultiProgress},

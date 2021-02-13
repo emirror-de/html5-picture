@@ -1,9 +1,9 @@
 #[derive(Clone, Debug)]
-pub struct Parameter {
+pub struct WebpParameter {
     pub quality: u8,
 }
 
-impl Parameter {
+impl WebpParameter {
     pub fn new(quality: Option<u8>) -> Self {
         let quality = Self::parameter_check_quality(quality);
         Self { quality }
