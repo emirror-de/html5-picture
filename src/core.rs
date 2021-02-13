@@ -100,12 +100,12 @@ pub fn collect_file_names(state: &mut State) {
     pb.set_prefix(&state.get_prefix());
     pb.set_message("Collecting files to convert...");
     state.file_names_to_convert = crate::collect_png_file_names(
-        &state.config.input_dir, //&config.input_dir,
+        &state.config.input_dir,
         Some(pb.clone()),
     );
     pb.finish_with_message(&format!(
         "Collected {} files!",
-        &state.file_names_to_convert.len(), //&file_names_to_convert.len()
+        &state.file_names_to_convert.len(),
     ));
 }
 
@@ -115,8 +115,8 @@ pub fn create_all_output_directories(state: &mut State) {
     pb.set_prefix(&state.get_prefix());
     pb.set_message("Create all output directories...");
     crate::fs::create_output_directories(
-        &state.config.input_dir,      //&config.input_dir,
-        &state.file_names_to_convert, //&file_names_to_convert,
+        &state.config.input_dir,
+        &state.file_names_to_convert,
         Some(pb.clone()),
     );
     pb.finish_with_message("Created all output directories!");
@@ -124,12 +124,12 @@ pub fn create_all_output_directories(state: &mut State) {
 
 /// Resizes and converts all input images.
 pub fn process_images(state: &mut State) {
-    let webp_params = WebpParameter::new(state.config.quality_webp); //config.quality_webp);
+    let webp_params = WebpParameter::new(state.config.quality_webp);
     let params = ProcessorParameter {
         webp_parameter: webp_params,
-        input: state.config.input_dir.clone(), //input: config.input_dir,
+        input: state.config.input_dir.clone(),
         output_dir: PathBuf::new(),
-        scaled_images_count: state.config.scaled_images_count, //scaled_images_count: config.scaled_images_count,
+        scaled_images_count: state.config.scaled_images_count,
     };
     let batch_params = BatchParameter {
         single_params: params,
