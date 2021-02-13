@@ -15,7 +15,6 @@ fn create_progressbar(len: u64) -> ProgressBar {
 }
 
 pub struct BatchParameter {
-    pub file_names: Vec<PathBuf>,
     pub single_params: Parameter,
 }
 
@@ -29,11 +28,11 @@ impl BatchProcessor {
         Self { params, progressbars }
     }
 
-    pub fn run(&self) {
+    pub fn run(&self, file_names: &Vec<PathBuf>) {
         let rt = tokio::runtime::Runtime::new().unwrap();
         rt.block_on(async {
             let mut handles = vec![];
-            for file_name in &self.params.file_names {
+            for file_name in file_names {
                 let mut params_single = self.params.single_params.clone();
                 params_single.input = file_name.clone();
                 let mut file_name = file_name.clone();
