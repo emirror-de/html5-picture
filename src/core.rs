@@ -177,7 +177,6 @@ pub fn install_images_into(state: &mut State) {
     let progress_handler = move |process_info: TransitProcess| {
         pb_clone.set_length(process_info.total_bytes);
         pb_clone.set_position(process_info.copied_bytes);
-        //println!("{}", process_info.total_bytes);
         if force_overwrite {
             return fs_extra::dir::TransitProcessResult::Overwrite;
         }
@@ -186,15 +185,14 @@ pub fn install_images_into(state: &mut State) {
     pb.set_message(&format!("Installing files to {}...", &install_string));
     let mut copy_options = CopyOptions::new();
     copy_options.content_only = true;
-    match move_dir_with_progress(
+    if let Err(msg) = move_dir_with_progress(
         path::get_output_working_dir(&state.config.input_dir).unwrap(),
         state.config.install_images_into.as_ref().unwrap(),
         &copy_options,
         progress_handler,
     ) {
-        Ok(b) => error!("{}", b),
-        Err(msg) => error!("{}", msg.to_string()),
-    };
+        error!("{}", msg.to_string());
+    }
     pb.finish_with_message(&format!(
         "Successfully installed images to {}!",
         state
