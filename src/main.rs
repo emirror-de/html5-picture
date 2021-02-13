@@ -49,9 +49,12 @@ fn create_spinner() -> ProgressBar {
     pb
 }
 
+type Step = fn(&mut State);
+
 struct State {
     pub config: Args,
     pub file_names_to_convert: Vec<PathBuf>,
+    pub current_step: usize,
     pub max_progress_steps: usize,
 }
 
@@ -60,14 +63,24 @@ impl State {
         Self {
             config,
             file_names_to_convert: vec![],
+            current_step: 0,
             max_progress_steps,
         }
+    }
+
+    pub fn dequeue(&mut self, queue: &mut Queue<Step>) -> Option<Step> {
+        self.current_step = self.max_progress_steps + 1 - queue.len();
+        queue.dequeue()
+    }
+
+    pub fn get_prefix(&self) -> String {
+        format!("{}/{}", self.current_step, self.max_progress_steps)
     }
 }
 
 fn collect_file_names(state: &mut State) {
     let pb = create_spinner();
-    pb.set_prefix(&format!("1/{}", state.max_progress_steps));
+    pb.set_prefix(&state.get_prefix());
     pb.set_message("Collecting files to convert...");
     state.file_names_to_convert = html5_picture::collect_png_file_names(
         &state.config.input_dir, //&config.input_dir,
@@ -81,7 +94,7 @@ fn collect_file_names(state: &mut State) {
 
 fn create_all_output_directories(state: &mut State) {
     let pb = create_spinner();
-    pb.set_prefix(&format!("2/{}", state.max_progress_steps));
+    pb.set_prefix(&state.get_prefix());
     pb.set_message("Create all output directories...");
     html5_picture::fs::create_output_directories(
         &state.config.input_dir, //&config.input_dir,
@@ -108,7 +121,7 @@ fn process_images(state: &mut State) {
         Some(Arc::clone(&mp)),
     );
     let pb = create_spinner();
-    pb.set_prefix(&format!("3/{}", state.max_progress_steps));
+    pb.set_prefix(&state.get_prefix());
     pb.set_message("Converting files...");
     batch_processor.run(&state.file_names_to_convert);
     pb.finish_with_message("Finished :-)");
@@ -131,7 +144,7 @@ fn main() {
 
     let mut s = State::new(config, q.len());
 
-    while let Some(step_function) = q.dequeue() {
+    while let Some(step_function) = s.dequeue(&mut q) {
         step_function(&mut s);
     }
 }
