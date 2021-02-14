@@ -36,24 +36,34 @@ pub struct Config {
     /// before convertion.
     /// Useful if you want to have multiple sizes of the image on the webpage
     /// for different breakpoints.
+    ///
     /// Example:
+    ///
     /// Input image dimensions: 6000x962
+    ///
     /// Scaled images count: 3
+    ///
     /// Resulting converted images:
     ///
     ///     [filename]               [dimensions]
+    ///
     ///     original_filename        6000x962
+    ///
     ///     original_filename-w4500  4500x751
+    ///
     ///     original_filename-w3000  3000x501
+    ///
     ///     original_filename-w1500  1500x250
     #[clap(short)]
     pub scaled_images_count: Option<u8>,
     /// Installs the converted and sized pictures into the given folder.
     #[clap(short)]
     pub install_images_into: Option<PathBuf>,
+    /*
     /// If true, the generation of HTML5 picture tag files is skipped.
     #[clap(short)]
     pub skip_html5_picture_tags: bool,
+    */
     /// If true, existing files are overwritten if install_images_into is set.
     #[clap(short)]
     pub force_overwrite: bool,
