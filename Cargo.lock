@@ -369,7 +369,7 @@ dependencies = [
 
 [[package]]
 name = "html5-picture"
-version = "0.0.4-alpha"
+version = "0.0.5-alpha"
 dependencies = [
  "clap",
  "fs_extra",

@@ -6,7 +6,7 @@ use {
         webp::processor::Parameter as ProcessorParameter,
         webp::WebpParameter,
     },
-    clap::Clap,
+    clap::{crate_authors, crate_version, Clap},
     fs_extra::dir::{move_dir_with_progress, CopyOptions, TransitProcess},
     indicatif::MultiProgress,
     log::error,
@@ -25,8 +25,8 @@ type Step = fn(&mut State);
 /// Depends on cwebp, so make sure webp is installed on your pc!
 #[derive(Clap, Debug)]
 #[clap(
-    version = "0.0.5-alpha",
-    author = "Lewin Probst <info@emirror.de>, Michael Flau <michael@flau.net>"
+    version = crate_version!(),
+    author = crate_authors!(", ")
 )]
 pub struct Config {
     /// The directory containing all images that should be processed.
