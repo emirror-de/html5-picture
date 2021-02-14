@@ -9,6 +9,8 @@
 //! ```cwebp```.
 //! So make sure that webp is installed on your computer.
 //!
+//! The creation of picture tag files is not yet implemented but in our pipeline.
+//!
 //! ## Installation
 //!
 //! The binary can be installed via ```cargo install html5-picture```. As stated
