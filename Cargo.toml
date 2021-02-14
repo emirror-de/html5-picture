@@ -25,7 +25,7 @@ image = "^0.23.13"
 libmath = "^0.2.1"
 tokio = { version = "1", features = ["full"] }
 webp = "0.1"
-futures = "*"
+futures = "^0.3.12"
 indicatif = "0.15.0"
 queue = "^0.3.1"
 fs_extra = "^1.2.0"
