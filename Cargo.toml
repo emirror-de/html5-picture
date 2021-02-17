@@ -29,3 +29,4 @@ futures = "^0.3.12"
 indicatif = "0.15.0"
 queue = "^0.3.1"
 fs_extra = "^1.2.0"
+serde = { version = "^1.0.122", features = ["derive"] }

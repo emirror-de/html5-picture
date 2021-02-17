@@ -37,6 +37,9 @@ pub mod path;
 /// Functions operating on the filesystem that is required for ```html5_picture```
 pub mod fs;
 
+/// HTML5 related functions, such as creation of picture tags.
+pub mod html5;
+
 /// Determines if the given input filename contains a .png extension.
 pub fn is_png(input: &PathBuf) -> bool {
     match input.extension() {
