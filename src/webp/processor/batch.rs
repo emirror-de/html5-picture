@@ -65,14 +65,14 @@ impl BatchProcessor {
                         };
                     });
                     if result.is_err() {
-                        pb.unwrap().abandon_with_message("Image processing failed!");
+                        pb.unwrap().abandon_with_message("Wrong color profile!!");
                     }
                 });
                 handles.push(h);
             }
             if let Some(m) = &self.progressbars {
-                if let Err(msg) = m.join_and_clear() {
-                    error!("Failed to join and clear progressbars: {}", msg);
+                if let Err(msg) = m.join() {
+                    error!("Failed to join progressbars: {}", msg);
                 }
             }
             futures::future::join_all(handles).await;
