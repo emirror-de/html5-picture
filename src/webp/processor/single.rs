@@ -1,5 +1,6 @@
 use {
-    super::{Parameter, ResizedImageDetails},
+    super::Parameter,
+    crate::utils::ResizedImageDetails,
     image::{io::Reader as ImageReader, DynamicImage},
     indicatif::ProgressBar,
     log::error,
@@ -89,7 +90,10 @@ impl SingleProcessor {
             pb.inc(1);
         }
         if let Some(_) = self.params.scaled_images_count {
-            match self.get_resized_image_details() {
+            match ResizedImageDetails::from(
+                &self.params.input,
+                self.params.scaled_images_count.unwrap(),
+            ) {
                 Ok(v) => {
                     self.run_resize_images(v);
                 }
@@ -154,64 +158,5 @@ impl SingleProcessor {
             "{}.webp",
             file_name.to_str().unwrap()
         )))
-    }
-
-    /// Constructs the file name for a resized image.
-    fn get_resized_file_name(&self, width: u32) -> Result<PathBuf, String> {
-        let file_name = match &self.params.input.file_stem() {
-            Some(f) => f.to_owned(),
-            None => return Err("No filename given!".to_string()),
-        };
-        let file_name = match file_name.to_str() {
-            Some(f) => f,
-            None => {
-                return Err(
-                    "utf-8 check failed for resized filename".to_string()
-                )
-            }
-        };
-        Ok(PathBuf::from(format!("{}-w{}.webp", file_name, width)))
-    }
-
-    /// Resizes the image preserving the aspect ratio. Returns the new height.
-    pub fn calculate_height_preserve_aspect_ratio(
-        &self,
-        width: u32,
-    ) -> Result<u32, String> {
-        // get image dimensions
-        let (w, h) = match image::image_dimensions(&self.params.input) {
-            Err(msg) => return Err(msg.to_string()),
-            Ok((w, h)) => (w, h),
-        };
-        let scale_factor = width as f64 / w as f64;
-        Ok((scale_factor * h as f64) as u32)
-    }
-
-    /// Calculates height, width and output file names for the scaled images.
-    pub fn get_resized_image_details(
-        &self,
-    ) -> Result<Vec<ResizedImageDetails>, String> {
-        // get image dimensions
-        let (w, _) = match image::image_dimensions(&self.params.input) {
-            Err(msg) => return Err(msg.to_string()),
-            Ok((w, h)) => (w, h),
-        };
-        // calculate a step in pixel that is used to calculate the new width
-        let step =
-            w as f32 / (self.params.scaled_images_count.unwrap() as f32 + 1.0);
-        let mut resized_details = vec![];
-        for idx in 0..self.params.scaled_images_count.unwrap() {
-            let new_width = (idx + 1) as f32 * step;
-            let new_width = math::round::ceil(new_width.into(), 0) as u32;
-            let new_height =
-                self.calculate_height_preserve_aspect_ratio(new_width)?;
-            let output_file_name = self.get_resized_file_name(new_width)?;
-            resized_details.push(ResizedImageDetails::new(
-                output_file_name,
-                new_width,
-                new_height,
-            ));
-        }
-        Ok(resized_details)
     }
 }

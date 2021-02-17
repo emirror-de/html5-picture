@@ -1,5 +1,10 @@
 use indicatif::{ProgressBar, ProgressStyle};
 
+pub mod imageops;
+mod resized_image_details;
+
+pub use resized_image_details::ResizedImageDetails;
+
 /// Creates a spinner that can be used to indicate progress.
 pub fn create_spinner() -> ProgressBar {
     let pb = ProgressBar::new_spinner();
