@@ -16,8 +16,17 @@
 //! The binary can be installed via ```cargo install html5-picture```. As stated
 //! before, make sure webp is installed before using.
 use {
+    crate::core::{
+        collect_file_names,
+        create_all_output_directories,
+        install_images_into,
+        process_images,
+        Config,
+        State,
+    },
     indicatif::ProgressBar,
     log::error,
+    queue::Queue,
     std::path::PathBuf,
     walkdir::WalkDir,
 };
@@ -77,4 +86,24 @@ pub fn collect_png_file_names(
         file_names.push(entry);
     }
     file_names
+}
+
+pub fn run(config: Config) {
+    // add all default processes
+    let mut q: Queue<fn(&mut State)> = Queue::new();
+    q.queue(collect_file_names).unwrap();
+    q.queue(create_all_output_directories).unwrap();
+
+    // finally add processing step
+    q.queue(process_images).unwrap();
+
+    if let Some(_) = &config.install_images_into {
+        q.queue(install_images_into).unwrap();
+    }
+
+    let mut s = State::new(config, q.len());
+
+    while let Some(step_function) = s.dequeue(&mut q) {
+        step_function(&mut s);
+    }
 }
