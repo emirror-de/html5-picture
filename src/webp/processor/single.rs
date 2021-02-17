@@ -187,7 +187,7 @@ impl SingleProcessor {
         Ok((scale_factor * h as f64) as u32)
     }
 
-    /// Calculates height, width and output file name for all scaled images.
+    /// Calculates height, width and output file names for the scaled images.
     pub fn get_resized_image_details(
         &self,
     ) -> Result<Vec<ResizedImageDetails>, String> {
