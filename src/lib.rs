@@ -1,20 +1,55 @@
-//! # Purpose and usage
+//! *The documentation is still a work in progress, so if you have questions,
+//! you are welcome to create an issue. :-)*
+//!
+//! ## Purpose
 //!
 //! Supports the binary within this package.
 //! Contains functions to easily generate different sizes of a picture that
-//! is used on webpages. Also offers the possibility to convert them into webp
-//! format and is able to create a ```<picture>``` tag for the given images.
+//! can be used on webpages. Also offers the possibility to convert them into webp
+//! format and is able to create ```<picture>``` tags for the given images.
 //!
 //! Currently this crate is only capable of converting ```png``` files to webp using
 //! ```cwebp```.
 //! So make sure that webp is installed on your computer.
 //!
-//! The creation of picture tag files is not yet implemented but in our pipeline.
-//!
 //! ## Installation
 //!
 //! The binary can be installed via ```cargo install html5-picture```. As stated
 //! before, make sure webp is installed before using.
+//!
+//! ## Usage
+//!
+//! Use ```html5-picture --help``` for an overview of all parameters.
+//!
+//! ## Examples
+//!
+//! ### Conversion with three scales and 70% quality
+//! If you want to create three different sizes of the images in ```./assets```
+//! with a conversion quality of 70%, enter the following command:
+//!
+//! ```bash
+//! html5-picture ./assets 3 -q 70
+//! ```
+//!
+//! This will convert your images and save them to ```./assets-html5picture```.
+//! This folder is also the working directory make sure to not modify it while
+//! the application is running.
+//!
+//! ### Conversion with given installation folder
+//! If you pass ```-i <folder_name>``` as parameter, the resulting files are
+//! moved from the working directory to the given ```<folder_name>``` after conversion
+//! and scaling.
+//!
+//! ```bash
+//! html5-picture ./assets 3 -q 100 -i ./assets-build
+//! ```
+//!
+//! In this example the images are installted to ```./assets-build```.
+//!
+//! ## Known limits
+//!
+//! The binary is not yet supporting the output of picture tags itself. The
+//! required functions are available and tested, but not yet added to the binary.
 use {
     crate::core::{
         collect_file_names,

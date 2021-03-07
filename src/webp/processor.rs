@@ -1,3 +1,5 @@
+//! Contains the processors that execute the single and batch conversion.
+
 use {crate::webp::WebpParameter, std::path::PathBuf};
 
 mod batch;

@@ -6,18 +6,22 @@ use {
 
 type PathBufPictureRegister = HashMap<PathBuf, Picture>;
 
+/// Contains information about the MediaWidth property of a ```<picture>``` that
+/// are required for its creation.
 #[derive(Serialize, Deserialize, Debug)]
 pub enum MediaWidth {
     Max(String),
     Min(String),
 }
 
+/// Information about the source attributes in a ```<picture>``` tag.
 #[derive(Serialize, Deserialize, Debug)]
 pub struct SourceAttributes {
     pub media_width: MediaWidth,
     pub srcset: String,
 }
 
+/// Represents the HTML5 ```<picture>``` tag.
 #[derive(Serialize, Deserialize, Debug)]
 pub struct Picture {
     sources: Vec<SourceAttributes>,
@@ -25,6 +29,8 @@ pub struct Picture {
 }
 
 impl Picture {
+    /// Collects all information about the image required for the creation of a
+    /// ```<picture>``` tag.
     pub fn from(
         image_file_name: &PathBuf,
         scaled_images_count: u8,
@@ -76,6 +82,8 @@ impl Picture {
         })
     }
 
+    /// Creates a string that contains the full ```<picture>``` tag. It can
+    /// directly be embedded into a webpage.
     pub fn to_html_string(
         &self,
         srcset_prefix: Option<String>,
@@ -141,6 +149,7 @@ impl PictureRegister {
         })
     }
 
+    /// Creates the register from the given config.
     fn create_register(
         config: &Config,
     ) -> Result<PathBufPictureRegister, String> {
@@ -173,6 +182,12 @@ impl PictureRegister {
         Ok(register)
     }
 
+    /// Returns a reference to the ```Picture``` instance of the given image.
+    /// Please use the original filename of the picture that you want to use,
+    /// for example:
+    /// ```ignore
+    /// let p = register_instance.get(&PathBuf::from("assets/image-1.png")).unwrap();
+    /// ```
     pub fn get(&self, image: &PathBuf) -> Result<&Picture, String> {
         match self.register.get(image) {
             None => Err("Image not found!".to_string()),
