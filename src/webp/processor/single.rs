@@ -108,7 +108,7 @@ impl SingleProcessor {
         }
         if let Some(ref pb) = &self.progressbar {
             //pb.finish_and_clear();
-            pb.finish_with_message("Done! :-)");
+            pb.finish_with_message("Done!");
         }
         Ok(())
     }
