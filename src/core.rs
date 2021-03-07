@@ -23,7 +23,7 @@ type Step = fn(&mut State);
 /// to be able to integrate them in a webpage easily.
 ///
 /// Depends on cwebp, so make sure webp is installed on your pc!
-#[derive(Clap, Debug)]
+#[derive(Clap, Debug, Clone)]
 #[clap(
     version = crate_version!(),
     author = crate_authors!(", ")
