@@ -4,6 +4,8 @@ use {
     std::{collections::HashMap, path::PathBuf},
 };
 
+type PathBufPictureRegister = HashMap<PathBuf, Picture>;
+
 #[derive(Serialize, Deserialize, Debug)]
 pub enum MediaWidth {
     Max(String),
@@ -101,5 +103,80 @@ impl Picture {
         ));
         html.push_str("</picture>");
         html
+    }
+}
+
+/// Contains a HashMap with all required details of the images to create an
+/// according picture tag.
+/// The image details are loaded into memory to be able to retrieve them as fast
+/// as possible.
+/// The install_images_into parameter is used to determine which images can be
+/// used.
+#[derive(Debug)]
+pub struct PictureRegister {
+    config: Config,
+    register: PathBufPictureRegister,
+}
+
+impl PictureRegister {
+    /// Creates a new instance from the given config.
+    pub fn from(config: &Config) -> Result<Self, String> {
+        match &config.install_images_into {
+            None => {
+                return Err(
+                    "The install_images_into parameter needs to be set!"
+                        .to_string(),
+                )
+            }
+            Some(v) => {
+                if !v.is_dir() {
+                    return Err("The install_images_into parameter is not a valid directory".to_string());
+                }
+            }
+        }
+
+        Ok(Self {
+            config: config.clone(),
+            register: Self::create_register(&config)?,
+        })
+    }
+
+    fn create_register(
+        config: &Config,
+    ) -> Result<PathBufPictureRegister, String> {
+        let images_path = match &config.install_images_into {
+            None => {
+                return Err(
+                    "The install_images_into parameter needs to be set!"
+                        .to_string(),
+                )
+            }
+            Some(v) => {
+                if !v.is_dir() {
+                    return Err("The install_images_into parameter is not a valid directory".to_string());
+                }
+                v
+            }
+        };
+
+        let scaled_images_count = match &config.scaled_images_count {
+            Some(v) => *v,
+            None => 1,
+        };
+
+        let mut register = PathBufPictureRegister::new();
+        let png_file_names = crate::collect_png_file_names(&images_path, None);
+        for png in png_file_names {
+            let pic = Picture::from(&png, scaled_images_count)?;
+            register.insert(png, pic);
+        }
+        Ok(register)
+    }
+
+    pub fn get(&self, image: &PathBuf) -> Result<&Picture, String> {
+        match self.register.get(image) {
+            None => Err("Image not found!".to_string()),
+            Some(v) => Ok(v),
+        }
     }
 }
