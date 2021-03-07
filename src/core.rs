@@ -7,7 +7,12 @@ use {
         webp::WebpParameter,
     },
     clap::{crate_authors, crate_version, Clap},
-    fs_extra::dir::{move_dir_with_progress, CopyOptions, TransitProcess},
+    fs_extra::dir::{
+        copy_with_progress,
+        move_dir_with_progress,
+        CopyOptions,
+        TransitProcess,
+    },
     indicatif::MultiProgress,
     log::error,
     queue::Queue,
@@ -130,6 +135,33 @@ pub fn create_all_output_directories(state: &mut State) {
         Some(pb.clone()),
     );
     pb.finish_with_message("Created all output directories!");
+}
+
+pub fn copy_originals_to_output(state: &mut State) {
+    let pb = utils::create_progressbar(0);
+    let pb_clone = pb.clone();
+    let force_overwrite = state.config.force_overwrite;
+    let progress_handler = move |process_info: TransitProcess| {
+        pb_clone.set_length(process_info.total_bytes);
+        pb_clone.set_position(process_info.copied_bytes);
+        if force_overwrite {
+            return fs_extra::dir::TransitProcessResult::Overwrite;
+        }
+        fs_extra::dir::TransitProcessResult::ContinueOrAbort
+    };
+    pb.set_prefix(&state.get_prefix());
+    pb.set_message("Copying original files...");
+    let mut copy_options = CopyOptions::new();
+    copy_options.content_only = true;
+    if let Err(msg) = copy_with_progress(
+        &state.config.input_dir,
+        path::get_output_working_dir(&state.config.input_dir).unwrap(),
+        &copy_options,
+        progress_handler,
+    ) {
+        error!("{}", msg.to_string());
+    }
+    pb.finish_with_message("Successfully copied original images!");
 }
 
 /// Resizes and converts all input images.

@@ -18,6 +18,7 @@
 use {
     crate::core::{
         collect_file_names,
+        copy_originals_to_output,
         create_all_output_directories,
         install_images_into,
         process_images,
@@ -93,6 +94,7 @@ pub fn run(config: Config) {
     let mut q: Queue<fn(&mut State)> = Queue::new();
     q.queue(collect_file_names).unwrap();
     q.queue(create_all_output_directories).unwrap();
+    q.queue(copy_originals_to_output).unwrap();
 
     // finally add processing step
     q.queue(process_images).unwrap();
