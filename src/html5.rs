@@ -1,7 +1,7 @@
 use {
-    crate::utils::ResizedImageDetails,
+    crate::{core::Config, utils::ResizedImageDetails},
     serde::{Deserialize, Serialize},
-    std::path::PathBuf,
+    std::{collections::HashMap, path::PathBuf},
 };
 
 #[derive(Serialize, Deserialize, Debug)]
@@ -19,17 +19,13 @@ pub struct SourceAttributes {
 #[derive(Serialize, Deserialize, Debug)]
 pub struct Picture {
     sources: Vec<SourceAttributes>,
-    srcset_prefix: Option<String>,
     fallback_uri: String,
-    alt_text: String,
 }
 
 impl Picture {
     pub fn from(
         image_file_name: &PathBuf,
-        srcset_prefix: Option<String>,
         scaled_images_count: u8,
-        alt_text: Option<String>,
     ) -> Result<Self, String> {
         if scaled_images_count == 0 {
             return Err("scaled_images_count must be > 0".to_string());
@@ -37,34 +33,24 @@ impl Picture {
         let resized_image_details =
             ResizedImageDetails::from(&image_file_name, scaled_images_count)?;
         let mut sources = vec![];
+        let mut input_dir = image_file_name.clone();
+        input_dir.pop();
         for details in &resized_image_details {
-            let out_file_name = match details.output_file_name.file_name() {
-                Some(v) => v,
-                None => {
-                    return Err(String::from("Could not get output_file_name!"))
-                }
-            };
-            let out_file_name = match out_file_name.to_str() {
-                Some(v) => String::from(v),
-                None => {
-                    return Err(String::from(
-                        "Could not convert output_file_name!",
-                    ))
-                }
-            };
+            let out_file_name =
+                match input_dir.join(&details.output_file_name).to_str() {
+                    Some(v) => String::from(v),
+                    None => {
+                        return Err(String::from(
+                            "Could not convert output_file_name!",
+                        ))
+                    }
+                };
             sources.push(SourceAttributes {
                 media_width: MediaWidth::Max(details.width.to_string()),
                 srcset: out_file_name,
             });
         }
-        // append full scale image
-        let mut full_scale_image = match image_file_name.file_name() {
-            Some(v) => PathBuf::from(v),
-            None => {
-                return Err(String::from("Could not get output_file_name!"))
-            }
-        };
-        //let mut full_scale_image = image_file_name.file_name().clone();
+        let mut full_scale_image = image_file_name.clone();
         full_scale_image.set_extension("webp");
         let full_scale_image = match full_scale_image.to_str() {
             Some(v) => String::from(v),
@@ -84,15 +70,17 @@ impl Picture {
 
         Ok(Self {
             sources,
-            srcset_prefix,
             fallback_uri: image_file_name.to_str().unwrap().to_string(),
-            alt_text: alt_text.unwrap_or_default(),
         })
     }
 
-    pub fn to_html_string(&self) -> String {
+    pub fn to_html_string(
+        &self,
+        srcset_prefix: Option<String>,
+        alt_text: &str,
+    ) -> String {
         let mut html = String::from("<picture>");
-        let uri_prefix = match &self.srcset_prefix {
+        let uri_prefix = match &srcset_prefix {
             Some(v) => format!("{}/", v),
             None => String::new(),
         };
@@ -109,7 +97,7 @@ impl Picture {
         // add fallback image
         html.push_str(&format!(
             "<img src=\"{}{}\" alt=\"{}\" />",
-            uri_prefix, self.fallback_uri, self.alt_text
+            uri_prefix, self.fallback_uri, alt_text
         ));
         html.push_str("</picture>");
         html
