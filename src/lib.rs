@@ -92,6 +92,18 @@ pub fn collect_png_file_names(
 /// The main function of the binary. Executes all required steps for copying,
 /// conversion and installationn of the source images.
 pub fn run(config: Config) {
+    if !&config.input_dir.exists() {
+        error!("Input directory does not exist!");
+        return;
+    }
+    match &config.scaled_images_count {
+        None | Some(0) => {
+            error!("Minimum scaled images count is 1!");
+            return;
+        }
+        _ => (),
+    }
+
     // add all default processes
     let mut q: Queue<fn(&mut State)> = Queue::new();
     q.queue(collect_file_names).unwrap();
