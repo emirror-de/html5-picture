@@ -89,6 +89,8 @@ pub fn collect_png_file_names(
     file_names
 }
 
+/// The main function of the binary. Executes all required steps for copying,
+/// conversion and installationn of the source images.
 pub fn run(config: Config) {
     // add all default processes
     let mut q: Queue<fn(&mut State)> = Queue::new();
