@@ -59,7 +59,6 @@ pub struct Config {
     ///     original_filename-w3000  3000x501
     ///
     ///     original_filename-w1500  1500x250
-    #[clap(short)]
     pub scaled_images_count: Option<u8>,
     /// Installs the converted and sized pictures into the given folder.
     #[clap(short)]
