@@ -30,15 +30,14 @@ type Step = fn(&mut State);
 /// Depends on cwebp, so make sure webp is installed on your pc!
 ///
 /// Example:
-/// html5-picture ./assets 3
-/// Input image dimensions: 6000x962
-/// Scaled images count: 3
+/// html5-picture ./assets 3;
+/// Input image dimensions: 6000x962;
+/// Scaled images count: 3;
 /// Resulting converted images:
-///     [filename]               [dimensions]
-///     original_filename        6000x962
-///     original_filename-w4500  4500x751
-///     original_filename-w3000  3000x501
-///     original_filename-w1500  1500x250
+///     original_filename        6000x962;
+///     original_filename-w4500  4500x751;
+///     original_filename-w3000  3000x501;
+///     original_filename-w1500  1500x250;
 #[derive(Clap, Debug, Clone)]
 #[clap(
     version = crate_version!(),
