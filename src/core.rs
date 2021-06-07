@@ -52,7 +52,7 @@ pub struct Config {
     /// before convertion.
     /// Useful if you want to have multiple sizes of the image on the webpage
     /// for different breakpoints.
-    pub scaled_images_count: Option<u8>,
+    pub scaled_images_count: u8,
     /// Installs the converted and sized pictures into the given folder.
     #[clap(short)]
     pub install_images_into: Option<PathBuf>,

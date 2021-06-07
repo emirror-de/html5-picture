@@ -133,7 +133,7 @@ pub fn run(config: Config) {
         return;
     }
     match &config.scaled_images_count {
-        None | Some(0) => {
+        0 => {
             error!("Minimum scaled images count is 1!");
             return;
         }
