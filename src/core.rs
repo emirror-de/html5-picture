@@ -14,7 +14,7 @@ use {
         TransitProcess,
     },
     indicatif::MultiProgress,
-    log::error,
+    log::{debug, error},
     queue::Queue,
     std::{path::PathBuf, sync::Arc},
 };
@@ -56,12 +56,10 @@ pub struct Config {
     /// Installs the converted and sized pictures into the given folder.
     #[clap(short)]
     pub install_images_into: Option<PathBuf>,
-    /*
-    /// If true, the generation of HTML5 picture tag files is skipped.
+    /// The destination folder of HTML5 picture tag files.
     #[clap(short)]
-    pub skip_html5_picture_tags: bool,
-    */
-    /// If true, existing files are overwritten if install_images_into is set.
+    pub picture_tags_output_folder: Option<PathBuf>,
+    /// If true, existing files are overwritten if install-images-into is set.
     #[clap(short)]
     pub force_overwrite: bool,
     /// Defines the quality of cwebp conversion.
@@ -238,4 +236,21 @@ pub fn install_images_into(state: &mut State) {
             .to_str()
             .unwrap()
     ));
+}
+
+pub fn save_html_picture_tags(state: &mut State) {
+    if let None = &state.config.picture_tags_output_folder {
+        debug!("Parameter picture_tags_output_folder not set!");
+        return;
+    }
+    //let scaled_images_count = match &config.scaled_images_count {
+    //    Some(v) => *v,
+    //    None => 1,
+    //};
+
+    //let png_file_names = crate::collect_png_file_names(&images_path, None);
+    //for png in png_file_names {
+    //    let pic = Picture::from(&png, scaled_images_count)?;
+    //    register.insert(png, pic);
+    //}
 }
