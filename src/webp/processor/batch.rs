@@ -45,7 +45,7 @@ impl BatchProcessor {
 
                 let pb = if let Some(m) = &self.progressbars {
                     let pb =
-                        create_progressbar((&params_single.scaled_images_count.unwrap() + 1) as u64);
+                        create_progressbar((&params_single.scaled_images_count + 1) as u64);
                     let pb_clone = pb.clone();
                     m.add(pb);
                     Some(pb_clone)

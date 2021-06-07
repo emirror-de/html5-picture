@@ -50,6 +50,7 @@
 //!
 //! The binary is not yet supporting the output of picture tags itself. The
 //! required functions are available and tested, but not yet added to the binary.
+#[warn(missing_docs)]
 use {
     crate::core::{
         collect_file_names,
@@ -132,7 +133,7 @@ pub fn run(config: Config) {
         return;
     }
     match &config.scaled_images_count {
-        None | Some(0) => {
+        0 => {
             error!("Minimum scaled images count is 1!");
             return;
         }

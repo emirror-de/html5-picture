@@ -89,23 +89,21 @@ impl SingleProcessor {
             pb.set_message("...done!");
             pb.inc(1);
         }
-        if let Some(_) = self.params.scaled_images_count {
-            match ResizedImageDetails::from(
-                &self.params.input,
-                self.params.scaled_images_count.unwrap(),
-            ) {
-                Ok(v) => {
-                    self.run_resize_images(v);
+        match ResizedImageDetails::from(
+            &self.params.input,
+            self.params.scaled_images_count,
+        ) {
+            Ok(v) => {
+                self.run_resize_images(v);
+            }
+            Err(msg) => {
+                if let Some(ref pb) = &self.progressbar {
+                    pb.finish_with_message(&format!("Error: {}", &msg));
                 }
-                Err(msg) => {
-                    if let Some(ref pb) = &self.progressbar {
-                        pb.finish_with_message(&format!("Error: {}", &msg));
-                    }
-                    error!("{}", msg);
-                    return Err(msg);
-                }
-            };
-        }
+                error!("{}", msg);
+                return Err(msg);
+            }
+        };
         if let Some(ref pb) = &self.progressbar {
             //pb.finish_and_clear();
             pb.finish_with_message("Done!");
