@@ -50,7 +50,10 @@
 //!
 //! The binary is not yet supporting the output of picture tags itself. The
 //! required functions are available and tested, but not yet added to the binary.
-#[warn(missing_docs)]
+#[deny(missing_docs)]
+#[deny(missing_crate_level_docs)]
+#[deny(broken_intra_doc_links)]
+#[deny(private_intra_doc_links)]
 use {
     crate::core::{
         collect_file_names,
