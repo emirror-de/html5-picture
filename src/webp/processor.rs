@@ -16,5 +16,5 @@ pub struct Parameter {
     pub webp_parameter: WebpParameter,
     pub input: PathBuf,
     pub output_dir: PathBuf,
-    pub scaled_images_count: Option<u8>,
+    pub scaled_images_count: u8,
 }

@@ -1,5 +1,6 @@
 use {
     crate::{
+        html5::Picture,
         path,
         utils,
         webp::processor::BatchParameter,
@@ -19,6 +20,9 @@ use {
     std::{path::PathBuf, sync::Arc},
 };
 
+#[cfg(debug_assertions)]
+use log::debug;
+
 type Step = fn(&mut State);
 
 /// Converts the images (currently png only) of the input folder to webp format.
@@ -30,15 +34,14 @@ type Step = fn(&mut State);
 /// Depends on cwebp, so make sure webp is installed on your pc!
 ///
 /// Example:
-/// html5-picture ./assets 3
-/// Input image dimensions: 6000x962
-/// Scaled images count: 3
+/// html5-picture ./assets 3;
+/// Input image dimensions: 6000x962;
+/// Scaled images count: 3;
 /// Resulting converted images:
-///     [filename]               [dimensions]
-///     original_filename        6000x962
-///     original_filename-w4500  4500x751
-///     original_filename-w3000  3000x501
-///     original_filename-w1500  1500x250
+///     original_filename        6000x962;
+///     original_filename-w4500  4500x751;
+///     original_filename-w3000  3000x501;
+///     original_filename-w1500  1500x250;
 #[derive(Clap, Debug, Clone)]
 #[clap(
     version = crate_version!(),
@@ -52,17 +55,19 @@ pub struct Config {
     /// before convertion.
     /// Useful if you want to have multiple sizes of the image on the webpage
     /// for different breakpoints.
-    pub scaled_images_count: Option<u8>,
+    pub scaled_images_count: u8,
     /// Installs the converted and sized pictures into the given folder.
     #[clap(short)]
     pub install_images_into: Option<PathBuf>,
-    /*
-    /// If true, the generation of HTML5 picture tag files is skipped.
+    /// The destination folder of HTML5 picture tag files.
     #[clap(short)]
-    pub skip_html5_picture_tags: bool,
-    */
-    /// If true, existing files are overwritten if install_images_into is set.
+    pub picture_tags_output_folder: Option<PathBuf>,
+    /// Can be used in combination with -p, sets the mountpoint for links in
+    /// the HTML tags.
     #[clap(short)]
+    pub mountpoint: Option<PathBuf>,
+    /// If true, existing files are overwritten if install-images-into is set.
+    #[clap(short, long)]
     pub force_overwrite: bool,
     /// Defines the quality of cwebp conversion.
     #[clap(short)]
@@ -230,12 +235,135 @@ pub fn install_images_into(state: &mut State) {
     }
     pb.finish_with_message(&format!(
         "Successfully installed images to {}!",
-        state
+        state.config.install_images_into.as_ref().unwrap().display()
+    ));
+}
+
+pub fn save_html_picture_tags(state: &mut State) {
+    let pb =
+        utils::create_progressbar(state.file_names_to_convert.len() as u64);
+    pb.set_prefix(&state.get_prefix());
+    pb.set_message("Writing HTML picture tag files...");
+
+    if let None = &state.config.picture_tags_output_folder {
+        pb.abandon_with_message(
+            "Parameter picture_tags_output_folder not set!",
+        );
+        return;
+    }
+
+    for file_name in &state.file_names_to_convert {
+        use std::io::prelude::*;
+        let mut output_name = file_name.clone();
+        output_name.set_extension("html");
+        let output_tag_file_name =
+            match crate::path::create_output_file_name_with_output_dir(
+                &state.config.picture_tags_output_folder.as_ref().unwrap(),
+                &state.config.input_dir,
+                &output_name,
+            ) {
+                Ok(name) => name,
+                Err(msg) => {
+                    pb.abandon_with_message(&format!("{}", msg.to_string()));
+                    return;
+                }
+            };
+
+        #[cfg(debug_assertions)]
+        debug!("{:#?}", output_tag_file_name);
+
+        if std::path::Path::new(&output_tag_file_name).exists()
+            && !state.config.force_overwrite
+        {
+            #[cfg(debug_assertions)]
+            debug!("Skipping file {:#?}", output_tag_file_name);
+            continue;
+        }
+
+        let parent_folder = match output_tag_file_name.parent() {
+            Some(p) => p,
+            None => {
+                pb.abandon_with_message(&format!(
+                    "No parent folder available for {}",
+                    output_tag_file_name.display()
+                ));
+                return;
+            }
+        };
+        let is_folder = match std::fs::metadata(parent_folder) {
+            Ok(v) => v.is_dir(),
+            Err(_) => false,
+        };
+        if !is_folder {
+            if let Err(msg) = std::fs::create_dir_all(parent_folder) {
+                error!(
+                    "Parent folder could not be created: {}",
+                    msg.to_string()
+                );
+                return;
+            }
+        }
+
+        let mut pic =
+            Picture::from(&file_name, state.config.scaled_images_count)
+                .unwrap();
+
+        if let Some(mountpoint) = &state.config.mountpoint {
+            for source in &mut pic.sources {
+                source.srcset =
+                    match crate::path::create_output_file_name_with_output_dir(
+                        &mountpoint,
+                        &state.config.input_dir,
+                        &PathBuf::from(&source.srcset),
+                    ) {
+                        Ok(name) => String::from(name.to_str().unwrap()),
+                        Err(msg) => {
+                            pb.abandon_with_message(&format!(
+                                "{}",
+                                msg.to_string()
+                            ));
+                            return;
+                        }
+                    };
+            }
+            pic.fallback_uri =
+                match crate::path::create_output_file_name_with_output_dir(
+                    &mountpoint,
+                    &state.config.input_dir,
+                    &PathBuf::from(&pic.fallback_uri),
+                ) {
+                    Ok(name) => String::from(name.to_str().unwrap()),
+                    Err(msg) => {
+                        pb.abandon_with_message(&format!(
+                            "{}",
+                            msg.to_string()
+                        ));
+                        return;
+                    }
+                };
+        }
+
+        let mut html_file = match std::fs::File::create(output_tag_file_name) {
+            Ok(f) => f,
+            Err(msg) => {
+                error!("{}", msg.to_string());
+                return;
+            }
+        };
+        if let Err(msg) =
+            html_file.write_all(pic.to_html_string(None, "").as_bytes())
+        {
+            error!("{}", msg.to_string());
+        };
+        pb.inc(1);
+    }
+    pb.finish_with_message(&format!(
+        "Successfully wrote HTML picture tag files to: {}",
+        &state
             .config
-            .install_images_into
+            .picture_tags_output_folder
             .as_ref()
             .unwrap()
-            .to_str()
-            .unwrap()
+            .display()
     ));
 }

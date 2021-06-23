@@ -24,8 +24,10 @@ pub struct SourceAttributes {
 /// Represents the HTML5 ```<picture>``` tag.
 #[derive(Serialize, Deserialize, Debug)]
 pub struct Picture {
-    sources: Vec<SourceAttributes>,
-    fallback_uri: String,
+    /// Contains the `<source>` tags of the picture.
+    pub sources: Vec<SourceAttributes>,
+    /// Specifies the fallback uri of the picture.
+    pub fallback_uri: String,
 }
 
 impl Picture {
@@ -168,15 +170,10 @@ impl PictureRegister {
             }
         };
 
-        let scaled_images_count = match &config.scaled_images_count {
-            Some(v) => *v,
-            None => 1,
-        };
-
         let mut register = PathBufPictureRegister::new();
         let png_file_names = crate::collect_png_file_names(&images_path, None);
         for png in png_file_names {
-            let pic = Picture::from(&png, scaled_images_count)?;
+            let pic = Picture::from(&png, config.scaled_images_count)?;
             register.insert(png, pic);
         }
         Ok(register)
