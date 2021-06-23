@@ -1,6 +1,6 @@
 [package]
 name = "html5-picture"
-version = "0.0.5-rc.1"
+version = "0.1.0"
 authors = ["Lewin Probst <info@emirror.de>", "Michael Flau <michael@flau.net>"]
 edition = "2018"
 license = "MIT"
