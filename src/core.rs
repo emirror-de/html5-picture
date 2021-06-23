@@ -59,7 +59,7 @@ pub struct Config {
     #[clap(short)]
     pub picture_tags_output_folder: Option<PathBuf>,
     /// If true, existing files are overwritten if install-images-into is set.
-    #[clap(short)]
+    #[clap(short, long)]
     pub force_overwrite: bool,
     /// Defines the quality of cwebp conversion.
     #[clap(short)]
