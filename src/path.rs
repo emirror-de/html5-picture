@@ -23,6 +23,31 @@ pub fn create_output_file_name(
     Ok(output_base_dir.join(relative_file_name))
 }
 
+/// Calculates the relative filename according to `base_dir` and `input_file`
+/// and joins it with the `output_dir`.
+/// ## Example
+///
+/// ```
+/// use {
+///     html5_picture::path::create_output_file_name_with_output_dir,
+///     std::path::PathBuf,
+/// };
+///
+/// let output_dir = PathBuf::from("../new-assets");
+/// let base_dir = PathBuf::from("../assets");
+/// let input_file = PathBuf::from("../assets/some/picture.png");
+/// let output_file = create_output_file_name_with_output_dir(&output_dir, &base_dir, &input_file).unwrap();
+/// assert_eq!(output_file.to_str().unwrap(), "../new-assets/some/picture.png");
+/// ```
+pub fn create_output_file_name_with_output_dir(
+    output_dir: &PathBuf,
+    base_dir: &PathBuf,
+    input_file: &PathBuf,
+) -> Result<PathBuf, String> {
+    let relative_file_name = remove_base_dir(&base_dir, &input_file)?;
+    Ok(output_dir.join(relative_file_name))
+}
+
 /// Generates the output directory name by attaching a fixed string to it.
 /// ## Example
 ///
