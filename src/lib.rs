@@ -61,6 +61,7 @@ use {
         create_all_output_directories,
         install_images_into,
         process_images,
+        save_html_picture_tags,
         Config,
         State,
     },
@@ -152,8 +153,12 @@ pub fn run(config: Config) {
     // finally add processing step
     q.queue(process_images).unwrap();
 
+    // optional steps
     if let Some(_) = &config.install_images_into {
         q.queue(install_images_into).unwrap();
+    }
+    if let Some(_) = &config.picture_tags_output_folder {
+        q.queue(save_html_picture_tags).unwrap();
     }
 
     let mut s = State::new(config, q.len());

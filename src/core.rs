@@ -1,5 +1,6 @@
 use {
     crate::{
+        html5::Picture,
         path,
         utils,
         webp::processor::BatchParameter,
@@ -14,10 +15,13 @@ use {
         TransitProcess,
     },
     indicatif::MultiProgress,
-    log::{debug, error},
+    log::error,
     queue::Queue,
     std::{path::PathBuf, sync::Arc},
 };
+
+#[cfg(debug_assertions)]
+use log::debug;
 
 type Step = fn(&mut State);
 
@@ -232,18 +236,93 @@ pub fn install_images_into(state: &mut State) {
 }
 
 pub fn save_html_picture_tags(state: &mut State) {
+    let pb =
+        utils::create_progressbar(state.file_names_to_convert.len() as u64);
+    pb.set_prefix(&state.get_prefix());
+    pb.set_message("Writing HTML picture tag files...");
+
     if let None = &state.config.picture_tags_output_folder {
-        debug!("Parameter picture_tags_output_folder not set!");
+        pb.abandon_with_message(
+            "Parameter picture_tags_output_folder not set!",
+        );
         return;
     }
-    //let scaled_images_count = match &config.scaled_images_count {
-    //    Some(v) => *v,
-    //    None => 1,
-    //};
 
-    //let png_file_names = crate::collect_png_file_names(&images_path, None);
-    //for png in png_file_names {
-    //    let pic = Picture::from(&png, scaled_images_count)?;
-    //    register.insert(png, pic);
-    //}
+    for file_name in &state.file_names_to_convert {
+        use std::io::prelude::*;
+        let pic = Picture::from(&file_name, state.config.scaled_images_count)
+            .unwrap();
+        let mut output_name = file_name.clone();
+        output_name.set_extension("html");
+        let output_tag_file_name =
+            match crate::path::create_output_file_name_with_output_dir(
+                &state.config.picture_tags_output_folder.as_ref().unwrap(),
+                &state.config.input_dir,
+                &output_name,
+            ) {
+                Ok(name) => name,
+                Err(msg) => {
+                    pb.abandon_with_message(&format!("{}", msg.to_string()));
+                    return;
+                }
+            };
+
+        #[cfg(debug_assertions)]
+        debug!("{:#?}", output_tag_file_name);
+
+        if std::path::Path::new(&output_tag_file_name).exists()
+            && !state.config.force_overwrite
+        {
+            #[cfg(debug_assertions)]
+            debug!("Skipping file {:#?}", output_tag_file_name);
+            continue;
+        }
+
+        let parent_folder = match output_tag_file_name.parent() {
+            Some(p) => p,
+            None => {
+                pb.abandon_with_message(&format!(
+                    "No parent folder available for {}",
+                    output_tag_file_name.display()
+                ));
+                return;
+            }
+        };
+        let is_folder = match std::fs::metadata(parent_folder) {
+            Ok(v) => v.is_dir(),
+            Err(_) => false,
+        };
+        if !is_folder {
+            if let Err(msg) = std::fs::create_dir_all(parent_folder) {
+                error!(
+                    "Parent folder could not be created: {}",
+                    msg.to_string()
+                );
+                return;
+            }
+        }
+
+        let mut html_file = match std::fs::File::create(output_tag_file_name) {
+            Ok(f) => f,
+            Err(msg) => {
+                error!("{}", msg.to_string());
+                return;
+            }
+        };
+        if let Err(msg) =
+            html_file.write_all(pic.to_html_string(None, "").as_bytes())
+        {
+            error!("{}", msg.to_string());
+        };
+        pb.inc(1);
+    }
+    pb.finish_with_message(&format!(
+        "Successfully wrote HTML picture tag files to: {}",
+        &state
+            .config
+            .picture_tags_output_folder
+            .as_ref()
+            .unwrap()
+            .display()
+    ));
 }
