@@ -24,8 +24,10 @@ pub struct SourceAttributes {
 /// Represents the HTML5 ```<picture>``` tag.
 #[derive(Serialize, Deserialize, Debug)]
 pub struct Picture {
-    sources: Vec<SourceAttributes>,
-    fallback_uri: String,
+    /// Contains the `<source>` tags of the picture.
+    pub sources: Vec<SourceAttributes>,
+    /// Specifies the fallback uri of the picture.
+    pub fallback_uri: String,
 }
 
 impl Picture {
