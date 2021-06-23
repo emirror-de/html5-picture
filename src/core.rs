@@ -227,13 +227,7 @@ pub fn install_images_into(state: &mut State) {
     }
     pb.finish_with_message(&format!(
         "Successfully installed images to {}!",
-        state
-            .config
-            .install_images_into
-            .as_ref()
-            .unwrap()
-            .to_str()
-            .unwrap()
+        state.config.install_images_into.as_ref().unwrap().display()
     ));
 }
 
