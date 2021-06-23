@@ -66,7 +66,7 @@
 //! ### Read input files by JSON
 //! **Upcoming feature.**
 //! The pictures can be defined using JSON format. `html5-picture` will read it
-//! from stdin. This enables per image definition of all attributes such as `alt`
+//! from stdin. This enables definition of all attributes such as `alt` per image.
 #[deny(missing_docs)]
 #[deny(missing_crate_level_docs)]
 #[deny(broken_intra_doc_links)]
