@@ -1,5 +1,5 @@
 //! *The documentation is still a work in progress, so if you have questions,
-//! you are welcome to create an issue. :-)*
+//! you are welcome to [create an issue](https://github.com/emirror-de/html5-picture). :-)*
 //!
 //! ## Purpose
 //!
