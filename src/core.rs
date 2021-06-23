@@ -62,6 +62,10 @@ pub struct Config {
     /// The destination folder of HTML5 picture tag files.
     #[clap(short)]
     pub picture_tags_output_folder: Option<PathBuf>,
+    /// Can be used in combination with picture_tags_output_folder, sets the mountpoint for links in
+    /// the HTML tags.
+    #[clap(short)]
+    pub mountpoint: Option<PathBuf>,
     /// If true, existing files are overwritten if install-images-into is set.
     #[clap(short, long)]
     pub force_overwrite: bool,
@@ -250,8 +254,6 @@ pub fn save_html_picture_tags(state: &mut State) {
 
     for file_name in &state.file_names_to_convert {
         use std::io::prelude::*;
-        let pic = Picture::from(&file_name, state.config.scaled_images_count)
-            .unwrap();
         let mut output_name = file_name.clone();
         output_name.set_extension("html");
         let output_tag_file_name =
@@ -300,6 +302,45 @@ pub fn save_html_picture_tags(state: &mut State) {
                 );
                 return;
             }
+        }
+
+        let mut pic =
+            Picture::from(&file_name, state.config.scaled_images_count)
+                .unwrap();
+
+        if let Some(mountpoint) = &state.config.mountpoint {
+            for source in &mut pic.sources {
+                source.srcset =
+                    match crate::path::create_output_file_name_with_output_dir(
+                        &mountpoint,
+                        &state.config.input_dir,
+                        &PathBuf::from(&source.srcset),
+                    ) {
+                        Ok(name) => String::from(name.to_str().unwrap()),
+                        Err(msg) => {
+                            pb.abandon_with_message(&format!(
+                                "{}",
+                                msg.to_string()
+                            ));
+                            return;
+                        }
+                    };
+            }
+            pic.fallback_uri =
+                match crate::path::create_output_file_name_with_output_dir(
+                    &mountpoint,
+                    &state.config.input_dir,
+                    &PathBuf::from(&pic.fallback_uri),
+                ) {
+                    Ok(name) => String::from(name.to_str().unwrap()),
+                    Err(msg) => {
+                        pb.abandon_with_message(&format!(
+                            "{}",
+                            msg.to_string()
+                        ));
+                        return;
+                    }
+                };
         }
 
         let mut html_file = match std::fs::File::create(output_tag_file_name) {
