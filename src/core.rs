@@ -62,7 +62,7 @@ pub struct Config {
     /// The destination folder of HTML5 picture tag files.
     #[clap(short)]
     pub picture_tags_output_folder: Option<PathBuf>,
-    /// Can be used in combination with picture_tags_output_folder, sets the mountpoint for links in
+    /// Can be used in combination with -p, sets the mountpoint for links in
     /// the HTML tags.
     #[clap(short)]
     pub mountpoint: Option<PathBuf>,
