@@ -52,11 +52,14 @@ impl SingleProcessor {
     }
 
     /// Encodes the image stored internally to wepb.
-    fn encode_image(&self, img: &DynamicImage) -> WebPMemory {
+    fn encode_image(&self, img: &DynamicImage) -> Result<WebPMemory, String> {
         let encoder = webp::Encoder::from_image(&img);
-        // unwrap can safely be called here because it has been checked already
-        // on instantiation of the parameter
-        encoder.encode(self.params.webp_parameter.quality as f32)
+        if let Err(msg) = &encoder {
+            return Err(msg.to_string());
+        }
+        Ok(encoder
+            .unwrap()
+            .encode(self.params.webp_parameter.quality as f32))
     }
 
     /// Loads, resizes and converts the image to webp. Single threaded.
@@ -75,7 +78,7 @@ impl SingleProcessor {
         if let Some(ref pb) = &self.progressbar {
             pb.set_message("Encoding...");
         }
-        let encoded_img = self.encode_image(self.image.as_ref().unwrap());
+        let encoded_img = self.encode_image(self.image.as_ref().unwrap())?;
         if let Some(ref pb) = &self.progressbar {
             pb.set_message("Saving...");
         }
@@ -94,7 +97,7 @@ impl SingleProcessor {
             self.params.scaled_images_count,
         ) {
             Ok(v) => {
-                self.run_resize_images(v);
+                self.run_resize_images(v)?;
             }
             Err(msg) => {
                 if let Some(ref pb) = &self.progressbar {
@@ -111,8 +114,11 @@ impl SingleProcessor {
         Ok(())
     }
 
-    /// Subroutine of ```run```, processes the resizing before conversion.
-    fn run_resize_images(&self, details: Vec<ResizedImageDetails>) {
+    /// Subroutine of `run`, processes the resizing and conversion.
+    fn run_resize_images(
+        &self,
+        details: Vec<ResizedImageDetails>,
+    ) -> Result<(), String> {
         for detail in details.iter().rev() {
             if let Some(ref pb) = &self.progressbar {
                 pb.set_message(&format!(
@@ -130,7 +136,7 @@ impl SingleProcessor {
             if let Some(ref pb) = &self.progressbar {
                 pb.set_message("Encoding...");
             }
-            let img = &self.encode_image(&img);
+            let img = &self.encode_image(&img)?;
             if let Some(ref pb) = &self.progressbar {
                 pb.set_message("Saving...");
             }
@@ -143,6 +149,7 @@ impl SingleProcessor {
                 pb.inc(1);
             }
         }
+        Ok(())
     }
 
     /// Generates the output file name for resized images.

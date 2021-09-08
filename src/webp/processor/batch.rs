@@ -98,19 +98,14 @@ impl BatchProcessor {
                 &file_name
                 ).unwrap();
 
-            let result = std::panic::catch_unwind(|| {
-                let mut webp_processor =
-                    crate::webp::processor::SingleProcessor::new(
-                        params_single,
-                        None,
-                    )
-                    .unwrap();
-                if let Err(msg) = webp_processor.run() {
-                    error!("Error: {}", msg);
-                }
-            });
-            if result.is_err() {
-                error!("Error: Wrong color profile! File: {}", full_file_name.display());
+            let mut webp_processor =
+                crate::webp::processor::SingleProcessor::new(
+                    params_single,
+                    None,
+                )
+                .unwrap();
+            if let Err(msg) = webp_processor.run() {
+                error!("Error: {}, File: {}", msg, full_file_name.display());
             }
         }
     }
