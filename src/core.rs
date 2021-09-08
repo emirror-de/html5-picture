@@ -45,7 +45,8 @@ type Step = fn(&mut State);
 #[derive(Clap, Debug, Clone)]
 #[clap(
     version = crate_version!(),
-    author = crate_authors!(", ")
+    author = crate_authors!(", "),
+    setting = clap::AppSettings::ColoredHelp
 )]
 pub struct Config {
     /// The directory containing all images that should be processed.
