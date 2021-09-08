@@ -239,6 +239,7 @@ pub fn install_images_into(state: &mut State) {
     ));
 }
 
+/// Saves the html `<picture>` tags to the folder given by the options.
 pub fn save_html_picture_tags(state: &mut State) {
     let pb =
         utils::create_progressbar(state.file_names_to_convert.len() as u64);
