@@ -68,9 +68,9 @@
 //! The pictures can be defined using JSON format. `html5-picture` will read it
 //! from stdin. This enables definition of all attributes such as `alt` per image.
 #[deny(missing_docs)]
-#[deny(missing_crate_level_docs)]
-#[deny(broken_intra_doc_links)]
-#[deny(private_intra_doc_links)]
+#[deny(rustdoc::missing_crate_level_docs)]
+#[deny(rustdoc::broken_intra_doc_links)]
+#[deny(rustdoc::private_intra_doc_links)]
 use {
     crate::core::{
         collect_file_names,

@@ -45,7 +45,8 @@ type Step = fn(&mut State);
 #[derive(Clap, Debug, Clone)]
 #[clap(
     version = crate_version!(),
-    author = crate_authors!(", ")
+    author = crate_authors!(", "),
+    setting = clap::AppSettings::ColoredHelp
 )]
 pub struct Config {
     /// The directory containing all images that should be processed.
@@ -72,6 +73,9 @@ pub struct Config {
     /// Defines the quality of cwebp conversion.
     #[clap(short)]
     pub quality_webp: Option<u8>,
+    /// If set, the processing is done single threaded.
+    #[clap(short)]
+    pub single_threaded: bool,
 }
 
 /// Contains the application state and config.
@@ -170,6 +174,7 @@ pub fn process_images(state: &mut State) {
         input: state.config.input_dir.clone(),
         output_dir: PathBuf::new(),
         scaled_images_count: state.config.scaled_images_count,
+        single_threaded: state.config.single_threaded,
     };
     let batch_params = BatchParameter {
         single_params: params,
@@ -239,6 +244,7 @@ pub fn install_images_into(state: &mut State) {
     ));
 }
 
+/// Saves the html `<picture>` tags to the folder given by the options.
 pub fn save_html_picture_tags(state: &mut State) {
     let pb =
         utils::create_progressbar(state.file_names_to_convert.len() as u64);

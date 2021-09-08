@@ -30,6 +30,13 @@ impl BatchProcessor {
     /// spawned in a separate tokio thread. This function creates a new tokio
     /// runtime.
     pub fn run(&self, file_names: &Vec<PathBuf>) {
+        // single threaded
+        if self.params.single_params.single_threaded {
+            self.run_single_threaded(file_names);
+            return;
+        }
+
+        // multi threaded
         let rt = tokio::runtime::Runtime::new().unwrap();
         rt.block_on(async {
             let mut handles = vec![];
@@ -65,7 +72,7 @@ impl BatchProcessor {
                         };
                     });
                     if result.is_err() {
-                        pb.unwrap().abandon_with_message("Wrong color profile!!");
+                        pb.unwrap().abandon_with_message("Wrong color profile!");
                     }
                 });
                 handles.push(h);
@@ -77,5 +84,34 @@ impl BatchProcessor {
             }
             futures::future::join_all(handles).await;
         });
+    }
+
+    fn run_single_threaded(&self, file_names: &Vec<PathBuf>) {
+        for file_name in file_names {
+            let full_file_name = file_name.clone();
+            let mut params_single = self.params.single_params.clone();
+            params_single.input = file_name.clone();
+            let mut file_name = file_name.clone();
+            file_name.pop();
+            params_single.output_dir = crate::path::create_output_file_name(
+                &self.params.single_params.input,
+                &file_name
+                ).unwrap();
+
+            let result = std::panic::catch_unwind(|| {
+                let mut webp_processor =
+                    crate::webp::processor::SingleProcessor::new(
+                        params_single,
+                        None,
+                    )
+                    .unwrap();
+                if let Err(msg) = webp_processor.run() {
+                    error!("Error: {}", msg);
+                }
+            });
+            if result.is_err() {
+                error!("Error: Wrong color profile! File: {}", full_file_name.display());
+            }
+        }
     }
 }
