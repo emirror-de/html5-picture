@@ -73,6 +73,9 @@ pub struct Config {
     /// Defines the quality of cwebp conversion.
     #[clap(short)]
     pub quality_webp: Option<u8>,
+    /// If set, the processing is done single threaded.
+    #[clap(short)]
+    pub single_threaded: bool,
 }
 
 /// Contains the application state and config.
@@ -171,6 +174,7 @@ pub fn process_images(state: &mut State) {
         input: state.config.input_dir.clone(),
         output_dir: PathBuf::new(),
         scaled_images_count: state.config.scaled_images_count,
+        single_threaded: state.config.single_threaded,
     };
     let batch_params = BatchParameter {
         single_params: params,
