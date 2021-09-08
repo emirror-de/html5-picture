@@ -1,6 +1,6 @@
 [package]
 name = "html5-picture"
-version = "0.1.1"
+version = "0.2.0"
 authors = ["Lewin Probst <info@emirror.de>", "Michael Flau <michael@flau.net>"]
 edition = "2018"
 license = "MIT"
@@ -16,15 +16,15 @@ categories = ["command-line-utilities", "compression", "multimedia::images", "we
 name = "html5-picture"
 
 [dependencies]
-clap = "^3.0.0-beta.2"
+clap = { version = "^3.0.0-beta.4", features = ["derive", "suggestions", "color"] }
 log = "^0.4.14"
 walkdir = "^2"
 pretty_env_logger = "^0.4.0"
 pathdiff = "^0.2.0"
 image = "^0.23.13"
 libmath = "^0.2.1"
-tokio = { version = "1", features = ["full"] }
-webp = "0.1"
+tokio = { version = "^1.11.0", features = ["full"] }
+webp = "^0.1.3"
 futures = "^0.3.12"
 indicatif = "0.15.0"
 queue = "^0.3.1"

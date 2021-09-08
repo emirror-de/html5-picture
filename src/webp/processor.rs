@@ -17,4 +17,5 @@ pub struct Parameter {
     pub input: PathBuf,
     pub output_dir: PathBuf,
     pub scaled_images_count: u8,
+    pub single_threaded: bool,
 }
