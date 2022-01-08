@@ -65,7 +65,9 @@ impl SingleProcessor {
     /// Loads, resizes and converts the image to webp. Single threaded.
     pub fn run(&mut self) -> Result<(), String> {
         if let Some(ref pb) = &self.progressbar {
-            pb.set_prefix(&self.params.input.to_str().unwrap());
+            pb.set_prefix(
+                &self.params.input.file_name().unwrap().to_str().unwrap(),
+            );
             pb.set_message("Loading image...");
         }
         self.image = Some(self.load_image().unwrap());
