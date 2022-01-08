@@ -1,4 +1,4 @@
-use {clap::Clap, html5_picture::core::Config};
+use {clap::Parser, html5_picture::core::Config};
 
 fn main() {
     std::env::set_var("RUST_LOG", "error");

@@ -7,7 +7,7 @@ use {
         webp::processor::Parameter as ProcessorParameter,
         webp::WebpParameter,
     },
-    clap::{crate_authors, crate_version, Clap},
+    clap::{crate_authors, crate_version, Parser},
     fs_extra::dir::{
         copy_with_progress,
         move_dir_with_progress,
@@ -42,11 +42,10 @@ type Step = fn(&mut State);
 ///     original_filename-w4500  4500x751;
 ///     original_filename-w3000  3000x501;
 ///     original_filename-w1500  1500x250;
-#[derive(Clap, Debug, Clone)]
+#[derive(Parser, Debug, Clone)]
 #[clap(
     version = crate_version!(),
     author = crate_authors!(", "),
-    setting = clap::AppSettings::ColoredHelp
 )]
 pub struct Config {
     /// The directory containing all images that should be processed.

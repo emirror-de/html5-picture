@@ -16,7 +16,7 @@ categories = ["command-line-utilities", "compression", "multimedia::images", "we
 name = "html5-picture"
 
 [dependencies]
-clap = { version = "^3.0.0-beta.4", features = ["derive", "suggestions", "color"] }
+clap = { version = "^3.0.5", features = ["derive", "suggestions", "color", "cargo"] }
 log = "^0.4.14"
 walkdir = "^2"
 pretty_env_logger = "^0.4.0"
