@@ -128,13 +128,23 @@ pub fn collect_file_names(state: &mut State) {
 pub fn create_all_output_directories(state: &mut State) {
     let pb = utils::create_spinner();
     pb.set_prefix(&state.get_prefix());
-    pb.set_message("Create all output directories...");
+    let message = if state.config.install_images_into.is_some() {
+        "Creating all temporary output directories..."
+    } else {
+        "Creating all output directories..."
+    };
+    pb.set_message(message);
     crate::fs::create_output_directories(
         &state.config.input_dir,
         &state.file_names_to_convert,
         Some(pb.clone()),
     );
-    pb.finish_with_message("Created all output directories!");
+    let message = if state.config.install_images_into.is_some() {
+        "Created all temporary output directories!"
+    } else {
+        "Created all output directories!"
+    };
+    pb.finish_with_message(message);
 }
 
 /// Copies the input folder to the working directory.
@@ -148,12 +158,13 @@ pub fn copy_originals_to_output(state: &mut State) {
         if force_overwrite {
             return fs_extra::dir::TransitProcessResult::Overwrite;
         }
-        fs_extra::dir::TransitProcessResult::ContinueOrAbort
+        fs_extra::dir::TransitProcessResult::Skip
     };
     pb.set_prefix(&state.get_prefix());
     pb.set_message("Copying original files...");
     let mut copy_options = CopyOptions::new();
     copy_options.content_only = true;
+    copy_options.skip_exist = true;
     if let Err(msg) = copy_with_progress(
         &state.config.input_dir,
         path::get_output_working_dir(&state.config.input_dir).unwrap(),
@@ -224,11 +235,12 @@ pub fn install_images_into(state: &mut State) {
         if force_overwrite {
             return fs_extra::dir::TransitProcessResult::Overwrite;
         }
-        fs_extra::dir::TransitProcessResult::ContinueOrAbort
+        fs_extra::dir::TransitProcessResult::Skip
     };
     pb.set_message(&format!("Installing files to {}...", &install_string));
     let mut copy_options = CopyOptions::new();
     copy_options.content_only = true;
+    copy_options.skip_exist = true;
     if let Err(msg) = move_dir_with_progress(
         path::get_output_working_dir(&state.config.input_dir).unwrap(),
         state.config.install_images_into.as_ref().unwrap(),
