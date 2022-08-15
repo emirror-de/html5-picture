@@ -1,6 +1,18 @@
 # Changelog
 
-## v0.2.2
+## 🎉 v0.2.3
+
+### 📦 New features
+
+### 📈 Changes
+
+### 🐛 Bugfixes
+
+* The copying process of images is no longer aborted. The images already existing are skipped if `-f` flag is not specified
+
+### 🔨 Breaking changes
+
+## 🎉 v0.2.2
 
 Bugfix release.  The following adjustments have been made:
 
@@ -10,7 +22,7 @@ Bugfix release.  The following adjustments have been made:
 
 * During processing, the prefix of the progressbar now shows the file name instead of the full path, enabling to have a smaller terminal width without getting visual artifacts.
 
-## v0.2.0
+## 🎉 v0.2.0
 
 Single threaded processing option has been added. Please note, that if using it with pictures having unsupported color profiles, an error is shown in the console, as well as a `panic` note of the main thread. This *does not* abort the processing! This behavior is due to [`webp`](https://github.com/jaredforth/webp) currently runs in an `unreachable!` statement if a color profile is not supported.
 
@@ -19,7 +31,7 @@ Single threaded processing option has been added. Please note, that if using it 
 * The following flags have been implemented
   * `-s`, If set, the processing is done single threaded
 
-## v0.1.0
+## 🎉 v0.1.0
 
 ### Usage of the command line utility
 
