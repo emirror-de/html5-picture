@@ -1,18 +1,11 @@
 use {
     crate::{
-        html5::Picture,
-        path,
-        utils,
-        webp::processor::BatchParameter,
-        webp::processor::Parameter as ProcessorParameter,
-        webp::WebpParameter,
+        html5::Picture, path, utils, webp::processor::BatchParameter,
+        webp::processor::Parameter as ProcessorParameter, webp::WebpParameter,
     },
     clap::{crate_authors, crate_version, Parser},
     fs_extra::dir::{
-        copy_with_progress,
-        move_dir_with_progress,
-        CopyOptions,
-        TransitProcess,
+        copy_with_progress, move_dir_with_progress, CopyOptions, TransitProcess,
     },
     indicatif::MultiProgress,
     log::error,
@@ -112,13 +105,13 @@ impl State {
 /// Collects all png files in the given input folder.
 pub fn collect_file_names(state: &mut State) {
     let pb = utils::create_spinner();
-    pb.set_prefix(&state.get_prefix());
+    pb.set_prefix(state.get_prefix());
     pb.set_message("Collecting files to convert...");
     state.file_names_to_convert = crate::collect_png_file_names(
         &state.config.input_dir,
         Some(pb.clone()),
     );
-    pb.finish_with_message(&format!(
+    pb.finish_with_message(format!(
         "Collected {} files!",
         &state.file_names_to_convert.len(),
     ));
@@ -127,7 +120,7 @@ pub fn collect_file_names(state: &mut State) {
 /// Recreates the folder structure of the input directory in the output directory.
 pub fn create_all_output_directories(state: &mut State) {
     let pb = utils::create_spinner();
-    pb.set_prefix(&state.get_prefix());
+    pb.set_prefix(state.get_prefix());
     let message = if state.config.install_images_into.is_some() {
         "Creating all temporary output directories..."
     } else {
@@ -160,7 +153,7 @@ pub fn copy_originals_to_output(state: &mut State) {
         }
         fs_extra::dir::TransitProcessResult::Skip
     };
-    pb.set_prefix(&state.get_prefix());
+    pb.set_prefix(state.get_prefix());
     pb.set_message("Copying original files...");
     let mut copy_options = CopyOptions::new();
     copy_options.content_only = true;
@@ -195,7 +188,7 @@ pub fn process_images(state: &mut State) {
         Some(Arc::clone(&mp)),
     );
     let pb = utils::create_spinner();
-    pb.set_prefix(&state.get_prefix());
+    pb.set_prefix(state.get_prefix());
     pb.set_message("Converting files...");
     batch_processor.run(&state.file_names_to_convert);
     pb.finish_with_message("Finished :-)");
@@ -209,7 +202,7 @@ pub fn install_images_into(state: &mut State) {
         Some(p) => {
             if !p.is_dir() {
                 if let Err(msg) = std::fs::create_dir_all(p) {
-                    pb.abandon_with_message(&format!(
+                    pb.abandon_with_message(format!(
                         "Could not create folder: {}",
                         msg.to_string()
                     ));
@@ -217,7 +210,7 @@ pub fn install_images_into(state: &mut State) {
             }
         }
     }
-    pb.set_prefix(&state.get_prefix());
+    pb.set_prefix(state.get_prefix());
     let install_path =
         state.config.install_images_into.as_ref().unwrap().to_str();
     let install_string = match install_path {
@@ -237,7 +230,7 @@ pub fn install_images_into(state: &mut State) {
         }
         fs_extra::dir::TransitProcessResult::Skip
     };
-    pb.set_message(&format!("Installing files to {}...", &install_string));
+    pb.set_message(format!("Installing files to {}...", &install_string));
     let mut copy_options = CopyOptions::new();
     copy_options.content_only = true;
     copy_options.skip_exist = true;
@@ -249,7 +242,7 @@ pub fn install_images_into(state: &mut State) {
     ) {
         error!("{}", msg.to_string());
     }
-    pb.finish_with_message(&format!(
+    pb.finish_with_message(format!(
         "Successfully installed images to {}!",
         state.config.install_images_into.as_ref().unwrap().display()
     ));
@@ -259,7 +252,7 @@ pub fn install_images_into(state: &mut State) {
 pub fn save_html_picture_tags(state: &mut State) {
     let pb =
         utils::create_progressbar(state.file_names_to_convert.len() as u64);
-    pb.set_prefix(&state.get_prefix());
+    pb.set_prefix(state.get_prefix());
     pb.set_message("Writing HTML picture tag files...");
 
     if let None = &state.config.picture_tags_output_folder {
@@ -281,7 +274,7 @@ pub fn save_html_picture_tags(state: &mut State) {
             ) {
                 Ok(name) => name,
                 Err(msg) => {
-                    pb.abandon_with_message(&format!("{}", msg.to_string()));
+                    pb.abandon_with_message(format!("{}", msg.to_string()));
                     return;
                 }
             };
@@ -300,7 +293,7 @@ pub fn save_html_picture_tags(state: &mut State) {
         let parent_folder = match output_tag_file_name.parent() {
             Some(p) => p,
             None => {
-                pb.abandon_with_message(&format!(
+                pb.abandon_with_message(format!(
                     "No parent folder available for {}",
                     output_tag_file_name.display()
                 ));
@@ -335,7 +328,7 @@ pub fn save_html_picture_tags(state: &mut State) {
                     ) {
                         Ok(name) => String::from(name.to_str().unwrap()),
                         Err(msg) => {
-                            pb.abandon_with_message(&format!(
+                            pb.abandon_with_message(format!(
                                 "{}",
                                 msg.to_string()
                             ));
@@ -351,10 +344,7 @@ pub fn save_html_picture_tags(state: &mut State) {
                 ) {
                     Ok(name) => String::from(name.to_str().unwrap()),
                     Err(msg) => {
-                        pb.abandon_with_message(&format!(
-                            "{}",
-                            msg.to_string()
-                        ));
+                        pb.abandon_with_message(format!("{}", msg.to_string()));
                         return;
                     }
                 };
@@ -374,7 +364,7 @@ pub fn save_html_picture_tags(state: &mut State) {
         };
         pb.inc(1);
     }
-    pb.finish_with_message(&format!(
+    pb.finish_with_message(format!(
         "Successfully wrote HTML picture tag files to: {}",
         &state
             .config

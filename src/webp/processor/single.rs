@@ -1,7 +1,7 @@
 use {
     super::Parameter,
     crate::utils::ResizedImageDetails,
-    image::{io::Reader as ImageReader, DynamicImage},
+    image::{DynamicImage, ImageReader},
     indicatif::ProgressBar,
     log::error,
     std::{fs::File, io::Write, path::PathBuf},
@@ -53,7 +53,7 @@ impl SingleProcessor {
 
     /// Encodes the image stored internally to wepb.
     fn encode_image(&self, img: &DynamicImage) -> Result<WebPMemory, String> {
-        let encoder = webp::Encoder::from_image(&img);
+        let encoder = webp::Encoder::from_image(img);
         if let Err(msg) = &encoder {
             return Err(msg.to_string());
         }
@@ -65,9 +65,15 @@ impl SingleProcessor {
     /// Loads, resizes and converts the image to webp. Single threaded.
     pub fn run(&mut self) -> Result<(), String> {
         if let Some(ref pb) = &self.progressbar {
-            pb.set_prefix(
-                &self.params.input.file_name().unwrap().to_str().unwrap(),
-            );
+            let fname = self
+                .params
+                .input
+                .file_name()
+                .unwrap()
+                .to_str()
+                .unwrap()
+                .to_string();
+            pb.set_prefix(fname);
             pb.set_message("Loading image...");
         }
         self.image = Some(self.load_image().unwrap());
@@ -103,7 +109,7 @@ impl SingleProcessor {
             }
             Err(msg) => {
                 if let Some(ref pb) = &self.progressbar {
-                    pb.finish_with_message(&format!("Error: {}", &msg));
+                    pb.finish_with_message(format!("Error: {}", &msg));
                 }
                 error!("{}", msg);
                 return Err(msg);
@@ -123,7 +129,7 @@ impl SingleProcessor {
     ) -> Result<(), String> {
         for detail in details.iter().rev() {
             if let Some(ref pb) = &self.progressbar {
-                pb.set_message(&format!(
+                pb.set_message(format!(
                     "Resizing to {}x{} ...",
                     &detail.width, &detail.height
                 ));

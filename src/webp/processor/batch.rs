@@ -3,9 +3,9 @@ use {
         utils::create_progressbar,
         webp::processor::Parameter,
     },
-    indicatif::{MultiProgress},
+    indicatif::MultiProgress,
     log::error,
-    std::{path::PathBuf, sync::Arc},
+    std::{path::PathBuf, sync::Arc}, tokio::task::JoinSet,
 };
 
 /// Contains all the required and optional parameter for the ```BatchProcessor```.
@@ -39,7 +39,7 @@ impl BatchProcessor {
         // multi threaded
         let rt = tokio::runtime::Runtime::new().unwrap();
         rt.block_on(async {
-            let mut handles = vec![];
+            let mut handles = JoinSet::new();
             for file_name in file_names {
                 let mut params_single = self.params.single_params.clone();
                 params_single.input = file_name.clone();
@@ -59,7 +59,7 @@ impl BatchProcessor {
                 } else {
                     None
                 };
-                let h = tokio::spawn(async move {
+                handles.spawn(async move {
                     let result = std::panic::catch_unwind(|| {
                         let mut webp_processor =
                             crate::webp::processor::SingleProcessor::new(
@@ -75,14 +75,16 @@ impl BatchProcessor {
                         pb.unwrap().abandon_with_message("Wrong color profile!");
                     }
                 });
-                handles.push(h);
             }
+            /*
             if let Some(m) = &self.progressbars {
-                if let Err(msg) = m.join() {
+                if let Err(msg) = handles.join_all() {
                     error!("Failed to join progressbars: {}", msg);
                 }
             }
             futures::future::join_all(handles).await;
+            */
+            let _ = handles.join_all().await;
         });
     }
 
