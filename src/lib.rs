@@ -1,6 +1,3 @@
-//! *The documentation is still a work in progress, so if you have questions,
-//! you are welcome to [create an issue](https://github.com/emirror-de/html5-picture). :-)*
-//!
 //! ## Purpose
 //!
 //! Supports the binary within this package.
@@ -73,14 +70,9 @@
 #[deny(rustdoc::private_intra_doc_links)]
 use {
     crate::core::{
-        collect_file_names,
-        copy_originals_to_output,
-        create_all_output_directories,
-        install_images_into,
-        process_images,
+        Config, State, collect_file_names, copy_originals_to_output,
+        create_all_output_directories, install_images_into, process_images,
         save_html_picture_tags,
-        Config,
-        State,
     },
     indicatif::ProgressBar,
     log::error,
