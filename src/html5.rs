@@ -185,7 +185,7 @@ impl PictureRegister {
     /// ```
     pub fn get(&self, image: &PathBuf) -> Result<&Picture, String> {
         match self.register.get(image) {
-            None => Err("Image not found!".to_string()),
+            None => Err(format!("Image {image:?} not found!")),
             Some(v) => Ok(v),
         }
     }
