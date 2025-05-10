@@ -52,7 +52,7 @@ impl Picture {
                     None => {
                         return Err(String::from(
                             "Could not convert output_file_name!",
-                        ))
+                        ));
                     }
                 };
             sources.push(SourceAttributes {
@@ -67,7 +67,7 @@ impl Picture {
             None => {
                 return Err(String::from(
                     "Could not convert full_scale_image file name!",
-                ))
+                ));
             }
         };
         sources.push(SourceAttributes {
@@ -124,7 +124,6 @@ impl Picture {
 /// used.
 #[derive(Debug)]
 pub struct PictureRegister {
-    config: Config,
     register: PathBufPictureRegister,
 }
 
@@ -136,7 +135,7 @@ impl PictureRegister {
                 return Err(
                     "The install_images_into parameter needs to be set!"
                         .to_string(),
-                )
+                );
             }
             Some(v) => {
                 if !v.is_dir() {
@@ -146,7 +145,6 @@ impl PictureRegister {
         }
 
         Ok(Self {
-            config: config.clone(),
             register: Self::create_register(&config)?,
         })
     }
@@ -160,7 +158,7 @@ impl PictureRegister {
                 return Err(
                     "The install_images_into parameter needs to be set!"
                         .to_string(),
-                )
+                );
             }
             Some(v) => {
                 if !v.is_dir() {

@@ -1,7 +1,6 @@
 use {clap::Parser, html5_picture::core::Config};
 
 fn main() {
-    std::env::set_var("RUST_LOG", "error");
     pretty_env_logger::init();
 
     // parse and check arguments for validity

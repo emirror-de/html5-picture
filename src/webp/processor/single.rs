@@ -64,7 +64,7 @@ impl SingleProcessor {
 
     /// Loads, resizes and converts the image to webp. Single threaded.
     pub fn run(&mut self) -> Result<(), String> {
-        if let Some(ref pb) = &self.progressbar {
+        if let Some(pb) = &self.progressbar {
             let fname = self
                 .params
                 .input
@@ -83,11 +83,11 @@ impl SingleProcessor {
             Err(msg) => return Err(msg.to_string()),
         };
         let output_file_name = &self.params.output_dir.join(output_file_name);
-        if let Some(ref pb) = &self.progressbar {
+        if let Some(pb) = &self.progressbar {
             pb.set_message("Encoding...");
         }
         let encoded_img = self.encode_image(self.image.as_ref().unwrap())?;
-        if let Some(ref pb) = &self.progressbar {
+        if let Some(pb) = &self.progressbar {
             pb.set_message("Saving...");
         }
         {
@@ -96,7 +96,7 @@ impl SingleProcessor {
                 error!("{}", msg);
             };
         }
-        if let Some(ref pb) = &self.progressbar {
+        if let Some(pb) = &self.progressbar {
             pb.set_message("...done!");
             pb.inc(1);
         }
@@ -108,14 +108,14 @@ impl SingleProcessor {
                 self.run_resize_images(v)?;
             }
             Err(msg) => {
-                if let Some(ref pb) = &self.progressbar {
+                if let Some(pb) = &self.progressbar {
                     pb.finish_with_message(format!("Error: {}", &msg));
                 }
                 error!("{}", msg);
                 return Err(msg);
             }
         };
-        if let Some(ref pb) = &self.progressbar {
+        if let Some(pb) = &self.progressbar {
             //pb.finish_and_clear();
             pb.finish_with_message("Done!");
         }
@@ -128,7 +128,7 @@ impl SingleProcessor {
         details: Vec<ResizedImageDetails>,
     ) -> Result<(), String> {
         for detail in details.iter().rev() {
-            if let Some(ref pb) = &self.progressbar {
+            if let Some(pb) = &self.progressbar {
                 pb.set_message(format!(
                     "Resizing to {}x{} ...",
                     &detail.width, &detail.height
@@ -141,18 +141,18 @@ impl SingleProcessor {
             );
             let output_file_name =
                 &self.params.output_dir.join(&detail.output_file_name);
-            if let Some(ref pb) = &self.progressbar {
+            if let Some(pb) = &self.progressbar {
                 pb.set_message("Encoding...");
             }
             let img = &self.encode_image(&img)?;
-            if let Some(ref pb) = &self.progressbar {
+            if let Some(pb) = &self.progressbar {
                 pb.set_message("Saving...");
             }
             let mut buf = File::create(output_file_name).unwrap();
             if let Err(msg) = buf.write_all(&img) {
                 error!("{}", msg);
             };
-            if let Some(ref pb) = &self.progressbar {
+            if let Some(pb) = &self.progressbar {
                 pb.set_message("...done!");
                 pb.inc(1);
             }

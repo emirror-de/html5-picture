@@ -1,8 +1,8 @@
 [package]
 name = "html5-picture"
 version = "0.2.2"
-authors = ["Lewin Probst <info@emirror.de>", "Michael Flau <michael@flau.net>"]
-edition = "2018"
+authors = ["Lewin Probst <info@emirror.de>"]
+edition = "2024"
 license = "MIT"
 description = "Batch optimizes your images to wepb. Generates html5 picture tags."
 homepage = "https://docs.rs/html5-picture"
@@ -10,13 +10,23 @@ documentation = "https://docs.rs/html5-picture"
 repository = "https://github.com/emirror-de/html5-picture"
 readme = "README.md"
 keywords = ["html5", "picture", "convert", "wepb"]
-categories = ["command-line-utilities", "compression", "multimedia::images", "web-programming"]
+categories = [
+    "command-line-utilities",
+    "compression",
+    "multimedia::images",
+    "web-programming",
+]
 
 [[bin]]
 name = "html5-picture"
 
 [dependencies]
-clap = { version = "3.0.5", features = ["derive", "suggestions", "color", "cargo"] }
+clap = { version = "3.0.5", features = [
+    "derive",
+    "suggestions",
+    "color",
+    "cargo",
+] }
 log = "0.4.14"
 walkdir = "2"
 pretty_env_logger = "0.5.0"

@@ -1,4 +1,4 @@
-use indicatif::{ProgressBar, ProgressStyle};
+use indicatif::ProgressBar;
 
 pub mod imageops;
 mod resized_image_details;
