@@ -1,11 +1,12 @@
 use {
     crate::{
-        html5::Picture, path, utils, webp::processor::BatchParameter,
-        webp::processor::Parameter as ProcessorParameter, webp::WebpParameter,
+        html5::Picture, path, utils, webp::WebpParameter,
+        webp::processor::BatchParameter,
+        webp::processor::Parameter as ProcessorParameter,
     },
-    clap::{crate_authors, crate_version, Parser},
+    clap::{Parser, crate_authors, crate_version},
     fs_extra::dir::{
-        copy_with_progress, move_dir_with_progress, CopyOptions, TransitProcess,
+        CopyOptions, TransitProcess, copy_with_progress, move_dir_with_progress,
     },
     indicatif::MultiProgress,
     log::error,
