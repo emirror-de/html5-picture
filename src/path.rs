@@ -99,9 +99,9 @@ pub fn remove_base_dir(
     base_dir: &PathBuf,
     input_file: &PathBuf,
 ) -> Result<PathBuf, String> {
-    match pathdiff::diff_paths(input_file, base_dir) {
-        Some(p) => Ok(p),
-        None => match input_file.to_str() {
+    match input_file.strip_prefix(base_dir) {
+        Ok(relative_path) => Ok(relative_path.to_path_buf()),
+        Err(_) => match input_file.to_str() {
             Some(v) => {
                 Err(String::from(format!("Could not remove base dir of {}", v)))
             }
