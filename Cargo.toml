@@ -4,12 +4,12 @@ version = "0.2.3"
 authors = ["Lewin Probst <info@emirror.de>"]
 edition = "2024"
 license = "MIT"
-description = "Batch optimizes your images to wepb. Generates html5 picture tags."
+description = "Batch optimizes your images to webp. Generates html5 picture tags."
 homepage = "https://docs.rs/html5-picture"
 documentation = "https://docs.rs/html5-picture"
 repository = "https://github.com/emirror-de/html5-picture"
 readme = "README.md"
-keywords = ["html5", "picture", "convert", "wepb"]
+keywords = ["html5", "picture", "convert", "webp"]
 categories = [
     "command-line-utilities",
     "compression",

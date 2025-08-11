@@ -51,7 +51,7 @@ impl SingleProcessor {
         Ok(img)
     }
 
-    /// Encodes the image stored internally to wepb.
+    /// Encodes the image stored internally to webp.
     fn encode_image(&self, img: &DynamicImage) -> Result<WebPMemory, String> {
         let encoder = webp::Encoder::from_image(img);
         if let Err(msg) = &encoder {

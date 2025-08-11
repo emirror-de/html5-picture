@@ -29,7 +29,7 @@
 //! ```
 //!
 //! This will convert your images and save them to `./assets-html5picture`.
-//! This folder is also the working directory make sure to not modify it while
+//! This folder is also the working directory - make sure to not modify it while
 //! the application is running.
 //!
 //! ### Conversion with given installation folder
@@ -139,7 +139,7 @@ pub fn collect_png_file_names(
 }
 
 /// The main function of the binary. Executes all required steps for copying,
-/// conversion and installationn of the source images.
+/// conversion and installation of the source images.
 pub fn run(config: Config) {
     if !&config.input_dir.exists() {
         error!("Input directory does not exist!");

@@ -46,7 +46,7 @@ pub struct Config {
     pub input_dir: PathBuf,
     /// The source image width is divided by this option (value + 1). Afterwards
     /// the source image is scaled (keeping the aspect ratio) to these widths
-    /// before convertion.
+    /// before conversion.
     /// Useful if you want to have multiple sizes of the image on the webpage
     /// for different breakpoints.
     pub scaled_images_count: u8,
