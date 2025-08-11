@@ -12,7 +12,7 @@ use std::path::{Path, PathBuf};
 /// let base_dir = PathBuf::from("../assets");
 /// let input_file = PathBuf::from("../assets/some/picture.png");
 /// let output_file = create_output_file_name(&base_dir, &input_file).unwrap();
-/// assert_eq!(output_file.to_str().unwrap(), "../assets-html5picture/some/picture.png");
+/// assert_eq!(output_file.to_str().unwrap(), "../.assets-html5picture/some/picture.png");
 /// ```
 pub fn create_output_file_name(
     base_dir: &PathBuf,
@@ -59,7 +59,7 @@ pub fn create_output_file_name_with_output_dir(
 ///
 /// let input = PathBuf::from("../assets");
 /// let input = get_output_working_dir(&input).unwrap();
-/// assert_eq!(input.to_str().unwrap(), "../assets-html5picture");
+/// assert_eq!(input.to_str().unwrap(), "../.assets-html5picture");
 /// ```
 pub fn get_output_working_dir(input_dir: &PathBuf) -> Result<PathBuf, String> {
     if let None = &input_dir.file_name() {
@@ -75,8 +75,10 @@ pub fn get_output_working_dir(input_dir: &PathBuf) -> Result<PathBuf, String> {
         None => Path::new(""),
     };
     // generate output directory
-    Ok(parent
-        .join(format!("{}-html5picture", input_dir_name.to_str().unwrap())))
+    Ok(parent.join(format!(
+        ".{}-html5picture",
+        input_dir_name.to_str().unwrap()
+    )))
 }
 
 /// Removes the given base directory from the given input file.
