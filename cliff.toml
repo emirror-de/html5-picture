@@ -1,0 +1,48 @@
+[changelog]
+header = "# Changelog\n"
+body = """
+{% if version %}\
+    ## v{{ version | trim_start_matches(pat="v") }}
+    Release date: *{{ timestamp | date(format="%Y-%m-%d") }}*
+{% else %}\
+    ## [unreleased]
+{% endif %}\
+{% for group, commits in commits | group_by(attribute="scope") %}
+    ### {{ group | upper_first }}
+    {% for group, commits in commits | group_by(attribute="group") %}
+        #### {{ group | upper_first }}
+        {% for commit in commits %}
+            {% if commit.breaking %}\
+            - **BREAKING**: {{ commit.message | upper_first }}\
+            {% else %}\
+            - {{ commit.message | upper_first }} [{{ commit.id | truncate(length=7, end="") }}]\
+            {% endif %}\
+        {% endfor %}
+    {% endfor %}\
+{% endfor %}\n
+"""
+trim = true
+footer = ""
+
+[git]
+conventional_commits = true
+filter_unconventional = false
+split_commits = false
+commit_parsers = [
+    { message = "^chore", group = "🚲 Miscellaneous Tasks", default_scope = "global changes" },
+    { message = "^feat", group = "🛳  Features", default_scope = "global changes" },
+    { message = "^fix", group = "🐞 Bug Fixes", default_scope = "global changes" },
+    { message = "^doc", group = "📄 Documentation", default_scope = "global changes" },
+    { message = "^perf", group = "🏎  Performance", default_scope = "global changes" },
+    { message = "^refactor", group = "🏗  Refactor", default_scope = "global changes" },
+    { message = "^style", group = "Styling", default_scope = "global changes" },
+    { message = "^test", group = "⚒ Testing", default_scope = "global changes" },
+]
+protect_breaking_commits = false
+filter_commits = false
+ignore_tags = ""
+topo_order = false
+sort_commits = "oldest"
+link_parsers = [
+    { pattern = "#(\\d+)", href = "https://github.com/emirror-de/html5-picture/issues/$1" },
+]
