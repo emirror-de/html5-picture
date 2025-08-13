@@ -48,7 +48,7 @@ impl Picture {
         for details in &resized_image_details {
             let out_file_name =
                 match input_dir.join(&details.output_file_name).to_str() {
-                    Some(v) => format!("/{v}"),
+                    Some(v) => v.to_string(),
                     None => {
                         return Err(String::from(
                             "Could not convert output_file_name!",
@@ -63,7 +63,7 @@ impl Picture {
         let mut full_scale_image = image_file_name.clone();
         full_scale_image.set_extension("webp");
         let full_scale_image = match full_scale_image.to_str() {
-            Some(v) => format!("/{v}"),
+            Some(v) => v.to_string(),
             None => {
                 return Err(String::from(
                     "Could not convert full_scale_image file name!",
