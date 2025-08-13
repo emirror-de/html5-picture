@@ -235,18 +235,63 @@ pub fn install_images_into(state: &mut State) {
     let mut copy_options = CopyOptions::new();
     copy_options.content_only = true;
     copy_options.skip_exist = true;
+    let temp_dir =
+        path::get_output_working_dir(&state.config.input_dir).unwrap();
     if let Err(msg) = move_dir_with_progress(
-        path::get_output_working_dir(&state.config.input_dir).unwrap(),
+        temp_dir.clone(),
         state.config.install_images_into.as_ref().unwrap(),
         &copy_options,
         progress_handler,
     ) {
         error!("{}", msg.to_string());
+        // Clean up temporary directory after failed move
+        if temp_dir.exists() {
+            if let Err(err) = std::fs::remove_dir_all(&temp_dir) {
+                error!(
+                    "Failed to remove temporary directory after failed move {}: {}",
+                    temp_dir.display(),
+                    err
+                );
+            }
+        }
+    } else {
+        // Verify temporary directory was removed by move operation
+        if temp_dir.exists() {
+            if let Err(err) = std::fs::remove_dir_all(&temp_dir) {
+                error!(
+                    "Failed to remove remaining temporary directory {}: {}",
+                    temp_dir.display(),
+                    err
+                );
+            }
+        }
     }
+
     pb.finish_with_message(format!(
         "Successfully installed images to {}!",
         state.config.install_images_into.as_ref().unwrap().display()
     ));
+}
+
+/// Cleans up the temporary directory used for processing images.
+pub fn cleanup_temporary_directory(state: &mut State) {
+    let temp_dir = match path::get_output_working_dir(&state.config.input_dir) {
+        Ok(dir) => dir,
+        Err(err) => {
+            error!("Failed to get temporary directory path: {}", err);
+            return;
+        }
+    };
+
+    if temp_dir.exists() {
+        if let Err(err) = std::fs::remove_dir_all(&temp_dir) {
+            error!(
+                "Failed to remove temporary directory {}: {}",
+                temp_dir.display(),
+                err
+            );
+        }
+    }
 }
 
 /// Saves the html `<picture>` tags to the folder given by the options.

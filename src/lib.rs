@@ -70,9 +70,9 @@
 #[deny(rustdoc::private_intra_doc_links)]
 use {
     crate::core::{
-        Config, State, collect_file_names, copy_originals_to_output,
-        create_all_output_directories, install_images_into, process_images,
-        save_html_picture_tags,
+        Config, State, cleanup_temporary_directory, collect_file_names,
+        copy_originals_to_output, create_all_output_directories,
+        install_images_into, process_images, save_html_picture_tags,
     },
     indicatif::ProgressBar,
     log::error,
@@ -169,6 +169,9 @@ pub fn run(config: Config) {
     if let Some(_) = &config.picture_tags_output_folder {
         q.queue(save_html_picture_tags).unwrap();
     }
+
+    // Always clean up temporary directory as the final step
+    q.queue(cleanup_temporary_directory).unwrap();
 
     let mut s = State::new(config, q.len());
 
